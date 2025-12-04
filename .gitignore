@@ -1,12 +1,10 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
-# Compiled output
+# Build / Compiled output
 /dist
 /tmp
 /out-tsc
 /bazel-out
 
-# Node
+# Node / Package managers
 /node_modules
 npm-debug.log
 yarn-error.log
@@ -28,16 +26,23 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
-# Miscellaneous
+# Angular / Misc
 /.angular/cache
 .sass-cache/
-/connect.lock
+.connect.lock
 /coverage
 /libpeerconnection.log
 testem.log
 /typings
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # System files
 .DS_Store
 Thumbs.db
+
+# Archives
 *.zip

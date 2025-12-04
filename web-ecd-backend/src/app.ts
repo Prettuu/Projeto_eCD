@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import authRoutes from "./routes/auth.routes";
@@ -27,6 +30,7 @@ import { ReturnItem } from './models/ReturnItem';
 import { CartItem } from './models/CartItem';
 import { Notification } from './models/Notification';
 import { Feedback } from './models/Feedback';
+
 
 Order.hasMany(OrderItem, {
   foreignKey: 'orderId',

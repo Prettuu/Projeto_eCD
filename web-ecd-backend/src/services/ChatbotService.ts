@@ -11,25 +11,7 @@ export class ChatbotService {
   ): Promise<string> {
     const context = await this.buildContext(clientId);
     
-    const prompt = `Você é um assistente virtual especializado de uma loja de CDs. 
-Seu papel é ajudar clientes com informações práticas e específicas sobre:
-- Como fazer pedidos (passo a passo)
-- Cupons disponíveis e como usar
-- Status de pedidos
-- Produtos e recomendações
-- Categorias e preços
-
-IMPORTANTE:
-- Para perguntas simples e práticas: Seja DETALHADO e ESPECÍFICO, dê instruções passo a passo
-- Para perguntas complexas ou fora do seu conhecimento: Diga educadamente que não possui conhecimento sobre o assunto
-- Sempre seja útil e prestativo
-
-Contexto do cliente:
-${context}
-
-Pergunta do cliente: ${message}
-
-Responda de forma clara e útil:`;
+    const systemPrompt = `Você é um assistente inteligente, amigável e prestativo. Responda às perguntas do usuário da melhor forma possível, buscando ser sempre claro, completo e natural, como um atendente humano experiente.`;
 
     try {
       if (!process.env.OPENAI_API_KEY) {
@@ -43,25 +25,15 @@ Responda de forma clara e útil:`;
           messages: [
             {
               role: 'system',
-              content: `Você é um assistente virtual especializado de uma loja de CDs. 
-Você ajuda clientes com:
-- Instruções passo a passo para fazer pedidos
-- Informações sobre cupons disponíveis
-- Status de pedidos e acompanhamento
-- Recomendações de produtos
-- Dúvidas sobre categorias e preços
-
-Para perguntas simples: Seja DETALHADO e dê instruções claras.
-Para perguntas complexas ou fora do seu conhecimento: Diga educadamente que não possui conhecimento sobre o assunto.
-Sempre seja útil, amigável e prestativo.`
+              content: systemPrompt
             },
             {
               role: 'user',
-              content: prompt
+              content: message
             }
           ],
-          max_tokens: 800,
-          temperature: 0.7
+          max_tokens: 1200,
+          temperature: 0.85
         },
         {
           headers: {
