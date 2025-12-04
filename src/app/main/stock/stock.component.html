@@ -1,0 +1,130 @@
+<main class="estoque-container">
+  <div *ngIf="isReadonly" class="products-view">
+    <header class="products-header">
+      <h1>Produtos Disponíveis</h1>
+      
+      <div *ngIf="!isAdmin" class="cart-button-wrapper">
+        <button class="btn primary cart-button" (click)="goToCart()" title="Ver carrinho">
+          🛒 Carrinho
+        </button>
+      </div>
+    </header>
+
+    <div class="products-grid">
+      <div *ngFor="let cd of cds" class="product-card" [class.inactive]="!cd.ativo || cd.estoque <= 0">
+        <div class="product-header">
+          <div class="product-badge" [class.active]="cd.ativo" [class.inactive]="!cd.ativo">
+            {{ cd.ativo && cd.estoque > 0 ? 'Disponível' : 'Indisponível' }}
+          </div>
+        </div>
+        
+        <div class="product-body">
+          <div class="product-icon">💿</div>
+          <h3 class="product-title">{{ cd.titulo }}</h3>
+          <p class="product-artist">{{ cd.artista }}</p>
+          
+          <div class="product-info">
+            <div class="info-row">
+              <span class="info-label">Ano:</span>
+              <span class="info-value">{{ cd.ano }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Categoria:</span>
+              <span class="info-value">{{ cd.categoria }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Estoque:</span>
+              <span class="info-value">{{ cd.estoque }} unidades</span>
+            </div>
+          </div>
+          
+          <div class="product-price">
+            <span class="price-label">Preço:</span>
+            <span class="price-value">R$ {{ cd.valorVenda | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <div class="product-footer">
+          <button
+            *ngIf="!isAdmin"
+            class="btn primary"
+            (click)="addToCart(cd)"
+            [disabled]="!selectedClientId || !cd.ativo || cd.estoque <= 0"
+            title="Adicionar ao carrinho">
+            🛒 Adicionar ao Carrinho
+          </button>
+          <div *ngIf="!isAdmin && cd.id" class="feedback-buttons">
+            <button class="btn-feedback like" (click)="giveFeedback(cd.id, true)" title="Gostei">
+              👍
+            </button>
+            <button class="btn-feedback dislike" (click)="giveFeedback(cd.id, false)" title="Não gostei">
+              👎
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="cds.length === 0" class="empty-state">
+        <p>Nenhum produto disponível no momento.</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isReadonly" class="stock-view">
+    <header class="stock-header">
+      <h1>Estoque de CDs</h1>
+      <button *ngIf="isAdmin" type="button" class="btn primary" (click)="redirectForm()">
+        <fa-icon [icon]="iconAdd"></fa-icon>
+        Novo CD
+      </button>
+    </header>
+
+    <section class="stock-list">
+      <table class="table-estoque">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Artista</th>
+            <th>Ano</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Valor de Custo</th>
+            <th>Valor de Venda</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cd of cds">
+            <td>{{ cd.titulo }}</td>
+            <td>{{ cd.artista }}</td>
+            <td>{{ cd.ano }}</td>
+            <td>{{ cd.categoria }}</td>
+            <td>{{ cd.estoque }}</td>
+            <td>R$ {{ cd.valorCusto | number:'1.2-2' }}</td>
+            <td>R$ {{ cd.valorVenda | number:'1.2-2' }}</td>
+            <td>
+              <span class="status-badge" [class.active]="cd.ativo" [class.inactive]="!cd.ativo">
+                {{ cd.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td class="actions-field">
+              <button class="btn primary" (click)="edit(cd)" title="Editar">
+                <fa-icon [icon]="iconEdit"></fa-icon>
+              </button>
+              <button class="btn ghost" (click)="delete(cd)" title="Excluir">
+                <fa-icon [icon]="iconTrash"></fa-icon>
+              </button>
+            </td>
+          </tr>
+          
+          <tr *ngIf="cds.length === 0">
+            <td colspan="9" class="empty-table">
+              Nenhum produto cadastrado
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</main>

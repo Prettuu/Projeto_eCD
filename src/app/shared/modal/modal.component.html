@@ -1,0 +1,18 @@
+<div *ngIf="isOpen" class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <span>{{ finalTitle }}</span>
+      <button class="close" (click)="closeModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <ng-content></ng-content>
+      <p *ngIf="showAlert" class="modal-alert">{{ alertMessage }}</p>
+    </div>
+
+    <div class="modal-footer">
+      <button [ngClass]="confirmButtonClass" (click)="confirmModal()">{{ finalConfirmText }}</button>
+      <button [ngClass]="cancelButtonClass" (click)="closeModal()">{{ finalCancelText }}</button>
+    </div>
+  </div>
+</div>

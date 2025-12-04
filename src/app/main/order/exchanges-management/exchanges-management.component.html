@@ -1,0 +1,248 @@
+<div class="exchanges-management-container">
+  <header class="management-header">
+    <h1>Gestão de Trocas e Devoluções</h1>
+    <button class="btn ghost" (click)="loadData()" [disabled]="isLoading">
+      🔄 Atualizar
+    </button>
+  </header>
+
+  <div class="tabs">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'exchanges'"
+      (click)="setActiveTab('exchanges')">
+      Trocas ({{ exchanges.length }})
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'returns'"
+      (click)="setActiveTab('returns')">
+      Devoluções ({{ returns.length }})
+    </button>
+  </div>
+
+  <div class="content-wrapper">
+    <section class="list-section">
+      <h2>{{ activeTab === 'exchanges' ? 'Solicitações de Troca' : 'Solicitações de Devolução' }}</h2>
+
+      <div *ngIf="isLoading" class="loading">
+        <p>Carregando...</p>
+      </div>
+
+      <div *ngIf="activeTab === 'exchanges' && !isLoading" class="requests-list">
+        <div 
+          *ngFor="let exchange of exchanges" 
+          class="request-card"
+          [class.selected]="selectedExchange?.id === exchange.id"
+          (click)="viewDetails(exchange)">
+          <div class="card-header">
+            <div>
+              <strong>Troca #{{ exchange.id }}</strong>
+              <span class="order-ref">Pedido #{{ exchange.orderId }}</span>
+            </div>
+            <span class="status-badge" [class]="getStatusClass(exchange.status)">
+              {{ exchange.status }}
+            </span>
+          </div>
+          <div class="card-body">
+            <p class="motivo">{{ exchange.motivo }}</p>
+            <small class="date">{{ exchange.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+          </div>
+          <div *ngIf="exchange.status === 'CONCLUIDA'" class="coupon-info" style="margin-top: 5px;">
+            🎫 Cupom: <strong>{{ getExchangeCouponCode(exchange) }}</strong>
+            <span *ngIf="getExchangeCouponValueForExchange(exchange) > 0"> 
+              (R$ {{ getExchangeCouponValueForExchange(exchange).toFixed(2) }})
+            </span>
+            <span *ngIf="isExchangeCouponUsed(exchange)" style="color: #f44336;"> - Utilizado</span>
+            <span *ngIf="!isExchangeCouponUsed(exchange) && exchange.status === 'CONCLUIDA'" style="color: #4CAF50;"> - Disponível</span>
+          </div>
+        </div>
+
+        <div *ngIf="exchanges.length === 0" class="empty-state">
+          Nenhuma solicitação de troca encontrada
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'returns' && !isLoading" class="requests-list">
+        <div 
+          *ngFor="let returnRequest of returns" 
+          class="request-card"
+          [class.selected]="selectedReturn?.id === returnRequest.id"
+          (click)="viewReturnDetails(returnRequest)">
+          <div class="card-header">
+            <div>
+              <strong>Devolução #{{ returnRequest.id }}</strong>
+              <span class="order-ref">Pedido #{{ returnRequest.orderId }}</span>
+            </div>
+            <span class="status-badge" [class]="getStatusClass(returnRequest.status)">
+              {{ returnRequest.status }}
+            </span>
+          </div>
+          <div class="card-body">
+            <p class="motivo">{{ returnRequest.motivo }}</p>
+            <small class="date">{{ returnRequest.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+          </div>
+          <div *ngIf="returnRequest.receivedAt" class="received-info">
+            Recebido em: {{ returnRequest.receivedAt | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+
+        <div *ngIf="returns.length === 0" class="empty-state">
+          Nenhuma solicitação de devolução encontrada
+        </div>
+      </div>
+    </section>
+
+    <section class="details-section" *ngIf="selectedExchange || selectedReturn">
+      <div *ngIf="selectedExchange" class="details-card">
+        <h3>Detalhes da Troca #{{ selectedExchange.id }}</h3>
+
+        <div class="detail-group">
+          <h4>Pedido Original</h4>
+          <p>Pedido #{{ selectedExchange.orderId }}</p>
+        </div>
+
+        <div class="detail-group">
+          <h4>Motivo</h4>
+          <p>{{ selectedExchange.motivo }}</p>
+        </div>
+
+        <div class="detail-group" *ngIf="selectedExchange.observacoes">
+          <h4>Observações</h4>
+          <p>{{ selectedExchange.observacoes }}</p>
+        </div>
+
+        <div class="detail-group">
+          <h4>Itens</h4>
+          <ul class="items-list">
+            <li *ngFor="let item of selectedExchange.items">
+              {{ item.orderItem?.titulo || 'Item ' + item.productId }} - Qtd: {{ item.quantidade }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="detail-group" *ngIf="selectedExchange.status === 'CONCLUIDA'">
+          <h4>🎫 Cupom de Troca</h4>
+          <p class="coupon-code" style="font-size: 1.2em; font-weight: bold; color: #4CAF50;">
+            {{ getExchangeCouponCode(selectedExchange) }}
+          </p>
+          <div *ngIf="getExchangeCouponValueForExchange(selectedExchange) > 0">
+            <p><strong>Valor:</strong> R$ {{ getExchangeCouponValueForExchange(selectedExchange).toFixed(2) }}</p>
+          </div>
+          <div *ngIf="getExchangeCouponValueForExchange(selectedExchange) === 0 && selectedExchange.status === 'CONCLUIDA'">
+            <p><small style="color: #666;">Valor será calculado quando o cupom for usado</small></p>
+          </div>
+          <p *ngIf="isExchangeCouponUsed(selectedExchange)" style="color: #f44336;">
+            ⚠️ Este cupom já foi utilizado
+          </p>
+          <p *ngIf="!isExchangeCouponUsed(selectedExchange) && selectedExchange.status === 'CONCLUIDA'" style="color: #4CAF50;">
+            ✅ Cupom disponível para uso no próximo pedido
+          </p>
+          <p *ngIf="selectedExchange.status !== 'CONCLUIDA'" style="color: #ff9800;">
+            ⏳ Cupom será gerado quando a troca for concluída
+          </p>
+        </div>
+
+        <div class="detail-group">
+          <label>Observações para Aprovação/Negação</label>
+          <textarea 
+            [(ngModel)]="approvalObservations" 
+            rows="3" 
+            placeholder="Adicione observações (opcional)...">
+          </textarea>
+        </div>
+
+        <div class="actions">
+          <button 
+            *ngIf="selectedExchange && isPendingStatus(selectedExchange.status)" 
+            class="btn primary" 
+            (click)="approveExchange(selectedExchange.id)" 
+            [disabled]="isLoading">
+            ✅ Aprovar
+          </button>
+          <button 
+            *ngIf="selectedExchange && isPendingStatus(selectedExchange.status)" 
+            class="btn danger" 
+            (click)="rejectExchange(selectedExchange.id)" 
+            [disabled]="isLoading">
+            ❌ Negar
+          </button>
+          <button 
+            *ngIf="selectedExchange && isInProgressStatus(selectedExchange.status)" 
+            class="btn success" 
+            (click)="confirmExchangeReceived(selectedExchange.id)" 
+            [disabled]="isLoading">
+            📦 Confirmar Recebimento do Produto e Gerar Cupom
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="selectedReturn" class="details-card">
+        <h3>Detalhes da Devolução #{{ selectedReturn.id }}</h3>
+
+        <div class="detail-group">
+          <h4>Pedido Original</h4>
+          <p>Pedido #{{ selectedReturn.orderId }}</p>
+        </div>
+
+        <div class="detail-group">
+          <h4>Motivo</h4>
+          <p>{{ selectedReturn.motivo }}</p>
+        </div>
+
+        <div class="detail-group" *ngIf="selectedReturn.observacoes">
+          <h4>Observações</h4>
+          <p>{{ selectedReturn.observacoes }}</p>
+        </div>
+
+        <div class="detail-group">
+          <h4>Itens</h4>
+          <ul class="items-list">
+            <li *ngFor="let item of selectedReturn.items">
+              {{ item.orderItem?.titulo || 'Item ' + item.productId }} - Qtd: {{ item.quantidade }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="detail-group" *ngIf="selectedReturn.receivedAt">
+          <h4>Data de Recebimento</h4>
+          <p>{{ selectedReturn.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div class="detail-group">
+          <label>Observações para Aprovação/Negação</label>
+          <textarea 
+            [(ngModel)]="approvalObservations" 
+            rows="3" 
+            placeholder="Adicione observações (opcional)...">
+          </textarea>
+        </div>
+
+        <div class="actions">
+          <button 
+            *ngIf="selectedReturn.status === 'PENDENTE'" 
+            class="btn primary" 
+            (click)="approveReturn(selectedReturn.id)" 
+            [disabled]="isLoading">
+            ✅ Aprovar
+          </button>
+          <button 
+            *ngIf="selectedReturn.status === 'PENDENTE'" 
+            class="btn danger" 
+            (click)="rejectReturn(selectedReturn.id)" 
+            [disabled]="isLoading">
+            ❌ Negar
+          </button>
+          <button 
+            *ngIf="selectedReturn.status === 'APROVADA'" 
+            class="btn success" 
+            (click)="confirmReceived(selectedReturn.id)" 
+            [disabled]="isLoading">
+            📦 Confirmar Recebimento
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+

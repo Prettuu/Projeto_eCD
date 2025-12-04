@@ -1,0 +1,65 @@
+<section class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Bem-vindo ao eCD</h1>
+      <p class="subtitle">Faça login para acessar o sistema</p>
+    </div>
+
+    <form (ngSubmit)="login($event)">
+      <div class="form-group">
+        <label for="email">
+          <span class="icon">📧</span>
+          E-mail
+        </label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="seu@email.com"
+          required
+          autocomplete="email"
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="senha">
+          <span class="icon">🔒</span>
+          Senha
+        </label>
+        <input
+          id="senha"
+          type="password"
+          name="senha"
+          [(ngModel)]="senha"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="error-message" *ngIf="erro">
+        <span class="error-icon">⚠️</span>
+        {{ erro }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-primary" 
+        [disabled]="loading"
+        [class.loading]="loading"
+      >
+        <span *ngIf="!loading">Entrar</span>
+        <span *ngIf="loading" class="spinner"></span>
+      </button>
+    </form>
+
+    <button type="button" class="btn-link" (click)="primeiroAcesso()" [disabled]="loading">
+      Primeiro acesso? Cadastre-se aqui
+    </button>
+  </div>
+
+  <div class="login-bg"></div>
+</section>

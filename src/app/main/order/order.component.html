@@ -1,0 +1,128 @@
+<div class="orders-container">
+  <header class="orders-header">
+    <h1>{{ isProfileMode ? 'Meus Pedidos' : 'Pedidos' }}</h1>
+    
+    <div class="header-actions">
+      <button *ngIf="!isProfileMode" class="btn primary" (click)="newOrder()">
+        + Novo Pedido
+      </button>
+      <button class="btn ghost" (click)="reload()">
+        🔄 Recarregar
+      </button>
+    </div>
+  </header>
+
+  <section class="orders-list" *ngIf="orders.length > 0; else emptyState">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Data</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Pagamento</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of orders">
+          <td class="order-id">#{{ o.id }}</td>
+          <td class="order-client">{{ o.clientName || 'Cliente #' + o.clientId }}</td>
+          <td class="order-date">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="order-total">R$ {{ o.total | number:'1.2-2' }}</td>
+          <td class="order-status">
+            <span class="status-badge" [class]="getStatusClass(o.status)">
+              {{ o.status }}
+            </span>
+            <span *ngIf="!isProfileMode && getPendingExchangeStatus(o.id)" 
+                  class="status-badge status-pending-exchange">
+              ⏳ {{ getPendingExchangeStatus(o.id) }}
+            </span>
+            <span *ngIf="!isProfileMode && getPendingReturnStatus(o.id)" 
+                  class="status-badge status-pending-return">
+              ⏳ {{ getPendingReturnStatus(o.id) }}
+            </span>
+            <span *ngIf="isProfileMode && getClientExchangeStatus(o.id)" 
+                  class="status-badge" 
+                  [class]="getClientStatusClass(getClientExchangeStatus(o.id)!)">
+              {{ getClientExchangeStatus(o.id) === 'Troca Negada' ? '❌' : '' }}
+              {{ getClientExchangeStatus(o.id) === 'Troca Aprovada' ? '✅' : '' }}
+              {{ getClientExchangeStatus(o.id) === 'Aguardando Troca' ? '⏳' : '' }}
+              {{ getClientExchangeStatus(o.id) }}
+            </span>
+            <span *ngIf="isProfileMode && getClientReturnStatus(o.id)" 
+                  class="status-badge" 
+                  [class]="getClientStatusClass(getClientReturnStatus(o.id)!)">
+              {{ getClientReturnStatus(o.id) === 'Devolução Negada' ? '❌' : '' }}
+              {{ getClientReturnStatus(o.id) === 'Devolução Aprovada' ? '✅' : '' }}
+              {{ getClientReturnStatus(o.id) === 'Aguardando Devolução' ? '⏳' : '' }}
+              {{ getClientReturnStatus(o.id) }}
+            </span>
+          </td>
+          <td class="order-payment">
+            <span class="payment-badge" [class]="getPaymentClass(o.paymentStatus)">
+              {{ o.paymentStatus }}
+            </span>
+          </td>
+          <td class="order-actions">
+            <div class="actions-group">
+              <button class="btn primary btn-sm" (click)="view(o)" title="Visualizar pedido">
+                👁️ Visualizar
+              </button>
+
+              <button *ngIf="o.status === 'PROCESSANDO' && o.paymentStatus === 'PENDENTE'"
+                      class="btn primary btn-sm"
+                      (click)="markPaid(o)"
+                      title="Marcar como pago">
+                💳 Marcar pago
+              </button>
+              <button *ngIf="o.status === 'PROCESSANDO'"
+                      class="btn ghost btn-sm"
+                      (click)="cancel(o)"
+                      title="Cancelar pedido">
+                ❌ Cancelar
+              </button>
+
+              <button *ngIf="o.status === 'APROVADA' && o.paymentStatus === 'APROVADO' && !isProfileMode"
+                      class="btn primary btn-sm"
+                      (click)="send(o)"
+                      title="Enviar pedido">
+                📦 Enviar
+              </button>
+              <button *ngIf="o.status === 'APROVADA'"
+                      class="btn ghost btn-sm"
+                      (click)="cancel(o)"
+                      title="Cancelar pedido">
+                ❌ Cancelar
+              </button>
+
+              <button *ngIf="o.status === 'TRANSPORTE'"
+                      class="btn primary btn-sm"
+                      (click)="deliver(o)"
+                      title="Confirmar entrega">
+                ✅ Confirmar entrega
+              </button>
+
+              <button *ngIf="!isProfileMode"
+                      class="btn ghost btn-sm btn-danger"
+                      (click)="remove(o)"
+                      title="Excluir pedido">
+                🗑️ Excluir
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <ng-template #emptyState>
+    <div class="empty-orders">
+      <div class="empty-icon">📋</div>
+      <h2>{{ isProfileMode ? 'Você ainda não possui pedidos' : 'Nenhum pedido cadastrado' }}</h2>
+      <p *ngIf="!isProfileMode">Crie um novo pedido para começar.</p>
+      <p *ngIf="isProfileMode">Seus pedidos aparecerão aqui quando você fizer uma compra.</p>
+    </div>
+  </ng-template>
+</div>

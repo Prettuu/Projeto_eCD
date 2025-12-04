@@ -1,0 +1,104 @@
+<div class="exchange-request-container" *ngIf="order">
+  <header class="request-header">
+    <h1>
+      {{ type === 'exchange' ? 'Solicitar Troca' : 'Solicitar Devolução' }}
+      - Pedido #{{ order.id }}
+    </h1>
+  </header>
+
+  <form [formGroup]="form" class="request-form">
+    <section class="form-section">
+      <h3 class="section-title">
+        {{ type === 'exchange' ? 'Motivo da Troca' : 'Motivo da Devolução' }}
+      </h3>
+      <div class="field">
+        <textarea 
+          formControlName="motivo" 
+          rows="4" 
+          placeholder="Descreva o motivo da {{ type === 'exchange' ? 'troca' : 'devolução' }}..."
+          [class.error]="form.get('motivo')?.invalid && form.get('motivo')?.touched">
+        </textarea>
+        <small *ngIf="form.get('motivo')?.invalid && form.get('motivo')?.touched" class="error-message">
+          Motivo é obrigatório
+        </small>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3 class="section-title">Observações Adicionais (Opcional)</h3>
+      <div class="field">
+        <textarea 
+          formControlName="observacoes" 
+          rows="3" 
+          placeholder="Informações adicionais...">
+        </textarea>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3 class="section-title">
+        Itens para {{ type === 'exchange' ? 'Troca' : 'Devolução' }}
+        <span class="items-count">({{ getSelectedItemsCount() }} selecionado(s))</span>
+      </h3>
+
+      <div class="items-list" formArrayName="items">
+        <div *ngFor="let itemControl of items.controls; let i = index" [formGroupName]="i" class="item-card">
+          <div class="item-header">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                formControlName="selected"
+                (change)="toggleItem(i)">
+              <span class="item-title">{{ order.items[i].titulo }}</span>
+            </label>
+            <span class="item-price">
+              R$ {{ order.items[i].valorUnitario | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div *ngIf="itemControl.get('selected')?.value" class="item-details">
+            <div class="field-row">
+              <div class="field">
+                <label>Quantidade</label>
+                <input 
+                  type="number" 
+                  formControlName="quantidade"
+                  min="1"
+                  [max]="order.items[i].quantidade || 1"
+                  [class.error]="itemControl.get('quantidade')?.invalid && itemControl.get('quantidade')?.touched">
+                <small class="field-hint">
+                  Máximo: {{ order.items[i].quantidade }}
+                </small>
+              </div>
+              <div class="field">
+                <label>Motivo específico (opcional)</label>
+                <input 
+                  type="text" 
+                  formControlName="motivo"
+                  placeholder="Ex: Produto danificado, tamanho errado...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="getSelectedItemsCount() === 0" class="empty-state">
+          <p>Selecione pelo menos um item para {{ type === 'exchange' ? 'troca' : 'devolução' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="btn ghost" (click)="cancel()" [disabled]="isLoading">
+        Cancelar
+      </button>
+      <button 
+        type="button" 
+        class="btn primary" 
+        (click)="submit()" 
+        [disabled]="isLoading || form.invalid || getSelectedItemsCount() === 0">
+        {{ isLoading ? 'Enviando...' : 'Enviar Solicitação' }}
+      </button>
+    </div>
+  </form>
+</div>
+

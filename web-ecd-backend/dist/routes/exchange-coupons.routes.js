@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ExchangeCouponController_1 = require("../controllers/ExchangeCouponController");
+const router = (0, express_1.Router)();
+router.get('/client/:clientId', ExchangeCouponController_1.ExchangeCouponController.getByClientId);
+router.get('/code/:code', ExchangeCouponController_1.ExchangeCouponController.getByCode);
+router.post('/validate', ExchangeCouponController_1.ExchangeCouponController.validateCoupon);
+router.patch('/:code/use', ExchangeCouponController_1.ExchangeCouponController.markAsUsed);
+exports.default = router;

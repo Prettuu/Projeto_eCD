@@ -1,0 +1,40 @@
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo" routerLink="/app/home">
+      <fa-icon [icon]="faCompactDisc"></fa-icon>
+      <span>eCD</span>
+    </div>
+
+    <nav>
+      <ul>
+        <li *ngFor="let nav of navFields" (click)="goTo(nav.url)">
+          {{ nav.label }}
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="header-right">
+    <!-- Sininho de Notificações -->
+    <button 
+      *ngIf="userRole === 'CLIENT' || userRole === 'ADMIN'"
+      class="btn-notifications" 
+      (click)="goToNotifications()" 
+      title="Notificações">
+      <fa-icon [icon]="faBell"></fa-icon>
+      <span *ngIf="unreadCount > 0" class="notification-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+    </button>
+
+    <div class="user-info">
+      <fa-icon [icon]="faUser"></fa-icon>
+      <div class="user-details">
+        <span class="user-name">{{ userName || 'Usuário' }}</span>
+        <span class="user-role">{{ getRoleLabel() }}</span>
+      </div>
+    </div>
+    
+    <button class="btn-logout" (click)="logout()" title="Sair">
+      <fa-icon [icon]="faSignOutAlt"></fa-icon>
+    </button>
+  </div>
+</header>

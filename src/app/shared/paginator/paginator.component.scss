@@ -1,0 +1,48 @@
+.custom-paginator {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .page-size {
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .page-size-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+
+    .options {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        padding: 0.2rem 0.5rem;
+        cursor: pointer;
+        &.active {
+          font-weight: bold;
+          border-bottom: 2px solid black;
+        }
+      }
+    }
+  }
+
+  .paginator-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    button {
+      cursor: pointer;
+      &.active {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+}

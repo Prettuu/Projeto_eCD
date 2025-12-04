@@ -1,0 +1,99 @@
+<div class="notification-form-container">
+  <div class="form-header">
+    <h1>Criar Notificação</h1>
+    <button class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="notification-form">
+    <div class="form-group">
+      <label>
+        Título <span class="required">*</span>
+        <input 
+          type="text" 
+          formControlName="titulo" 
+          placeholder="Ex: Nova promoção disponível!"
+          maxlength="200" />
+        <small *ngIf="form.get('titulo')?.hasError('required') && form.get('titulo')?.touched" class="error">
+          Título é obrigatório
+        </small>
+        <small *ngIf="form.get('titulo')?.hasError('minlength') && form.get('titulo')?.touched" class="error">
+          Título deve ter no mínimo 3 caracteres
+        </small>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>
+        Mensagem <span class="required">*</span>
+        <textarea 
+          formControlName="mensagem" 
+          rows="5"
+          placeholder="Descreva a notificação..."></textarea>
+        <small *ngIf="form.get('mensagem')?.hasError('required') && form.get('mensagem')?.touched" class="error">
+          Mensagem é obrigatória
+        </small>
+        <small *ngIf="form.get('mensagem')?.hasError('minlength') && form.get('mensagem')?.touched" class="error">
+          Mensagem deve ter no mínimo 10 caracteres
+        </small>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>
+        Tipo <span class="required">*</span>
+        <select formControlName="tipo">
+          <option *ngFor="let tipo of tipos" [value]="tipo.value">
+            {{ getTipoIcon(tipo.value) }} {{ tipo.label }}
+          </option>
+        </select>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>
+        Enviar para <span class="required">*</span>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input 
+              type="radio" 
+              formControlName="enviarPara" 
+              value="todos" />
+            <span>🌐 Todos os clientes</span>
+          </label>
+          <label class="radio-option">
+            <input 
+              type="radio" 
+              formControlName="enviarPara" 
+              value="especifico" />
+            <span>👤 Cliente específico</span>
+          </label>
+        </div>
+      </label>
+    </div>
+
+    <div class="form-group" *ngIf="form.get('enviarPara')?.value === 'especifico'">
+      <label>
+        Cliente <span class="required">*</span>
+        <select formControlName="clientId" [disabled]="loading">
+          <option value="">Selecione um cliente</option>
+          <option *ngFor="let client of clients" [value]="client.id">
+            {{ client.nome }} ({{ client.email }})
+          </option>
+        </select>
+        <small *ngIf="form.get('clientId')?.hasError('required') && form.get('clientId')?.touched" class="error">
+          Selecione um cliente
+        </small>
+        <small *ngIf="loading" class="info">Carregando clientes...</small>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || sending">
+        <span *ngIf="!sending">📤 Enviar Notificação</span>
+        <span *ngIf="sending">Enviando...</span>
+      </button>
+    </div>
+  </form>
+</div>
+

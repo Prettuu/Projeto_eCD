@@ -1,0 +1,208 @@
+<div *ngIf="isProfileMode" class="profile-container">
+  <div class="profile-header">
+    <h1>Meu Perfil</h1>
+    <button class="btn primary" *ngIf="currentUserId" (click)="edit(currentUserId)">
+      ✏️ Editar Perfil
+    </button>
+  </div>
+
+  <div *ngFor="let cliente of clientesFiltrados" class="profile-content">
+    <div class="profile-card">
+      <h3 class="card-title">
+        <span class="card-icon">👤</span>
+        Dados Pessoais
+      </h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{ cliente.nome || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{ cliente.email || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">CPF</span>
+          <span class="info-value">{{ cliente.cpf || '—' }}</span>
+        </div>
+        <div class="info-item" *ngIf="cliente.genero">
+          <span class="info-label">Gênero</span>
+          <span class="info-value">{{ cliente.genero || '—' }}</span>
+        </div>
+        <div class="info-item" *ngIf="cliente.dataNascimento">
+          <span class="info-label">Data de Nascimento</span>
+          <span class="info-value">{{ cliente.dataNascimento | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-badge" [class.active]="cliente.ativo" [class.inactive]="!cliente.ativo">
+            {{ cliente.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card" *ngIf="cliente.telefone && (cliente.telefone.tipo || cliente.telefone.numero)">
+      <h3 class="card-title">
+        <span class="card-icon">📞</span>
+        Contato
+      </h3>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="cliente.telefone.tipo">
+          <span class="info-label">Tipo</span>
+          <span class="info-value">{{ cliente.telefone.tipo || '—' }}</span>
+        </div>
+        <div class="info-item" *ngIf="cliente.telefone.ddd && cliente.telefone.numero">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">({{ cliente.telefone.ddd }}) {{ cliente.telefone.numero }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card" *ngIf="cliente.enderecoResidencial && (cliente.enderecoResidencial.logradouro || cliente.enderecoResidencial.cep)">
+      <h3 class="card-title">
+        <span class="card-icon">📍</span>
+        Endereço Residencial
+      </h3>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="cliente.enderecoResidencial.logradouro">
+          <span class="info-label">Logradouro</span>
+          <span class="info-value">{{ cliente.enderecoResidencial.logradouro }}{{ cliente.enderecoResidencial.numero ? ', ' + cliente.enderecoResidencial.numero : '' }}</span>
+        </div>
+        <div class="info-item" *ngIf="cliente.enderecoResidencial.bairro">
+          <span class="info-label">Bairro</span>
+          <span class="info-value">{{ cliente.enderecoResidencial.bairro }}</span>
+        </div>
+        <div class="info-item" *ngIf="cliente.enderecoResidencial.cidade || cliente.enderecoResidencial.estado">
+          <span class="info-label">Cidade/Estado</span>
+          <span class="info-value">
+            {{ cliente.enderecoResidencial.cidade || '' }}{{ cliente.enderecoResidencial.cidade && cliente.enderecoResidencial.estado ? ' - ' : '' }}{{ cliente.enderecoResidencial.estado || '' }}
+          </span>
+        </div>
+        <div class="info-item" *ngIf="cliente.enderecoResidencial.cep">
+          <span class="info-label">CEP</span>
+          <span class="info-value">{{ cliente.enderecoResidencial.cep }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card" *ngIf="cliente.enderecosEntrega && cliente.enderecosEntrega.length > 0">
+      <h3 class="card-title">
+        <span class="card-icon">🚚</span>
+        Endereços de Entrega
+      </h3>
+      <div class="address-list">
+        <div class="address-item" *ngFor="let end of cliente.enderecosEntrega; let i = index">
+          <div class="address-header">
+            <strong>Endereço {{ i + 1 }}</strong>
+          </div>
+          <div class="info-grid">
+            <div class="info-item" *ngIf="end.logradouro">
+              <span class="info-label">Logradouro</span>
+              <span class="info-value">{{ end.logradouro }}{{ end.numero ? ', ' + end.numero : '' }}</span>
+            </div>
+            <div class="info-item" *ngIf="end.bairro">
+              <span class="info-label">Bairro</span>
+              <span class="info-value">{{ end.bairro }}</span>
+            </div>
+            <div class="info-item" *ngIf="end.cidade || end.estado">
+              <span class="info-label">Cidade/Estado</span>
+              <span class="info-value">
+                {{ end.cidade || '' }}{{ end.cidade && end.estado ? ' - ' : '' }}{{ end.estado || '' }}
+              </span>
+            </div>
+            <div class="info-item" *ngIf="end.cep">
+              <span class="info-label">CEP</span>
+              <span class="info-value">{{ end.cep }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card" *ngIf="cliente.cartoes && cliente.cartoes.length > 0">
+      <h3 class="card-title">
+        <span class="card-icon">💳</span>
+        Cartões de Crédito
+      </h3>
+      <div class="cards-list">
+        <div class="card-item" *ngFor="let cartao of cliente.cartoes">
+          <div class="card-info">
+            <strong>{{ cartao.bandeira || 'Cartão' }}</strong>
+            <span class="card-number">**** {{ (cartao.numero + '').slice(-4) }}</span>
+            <span class="card-details" *ngIf="cartao.validade">
+              Válido até {{ cartao.validade }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="clientesFiltrados.length === 0" class="empty-state">
+      <p>Nenhuma informação disponível.</p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isProfileMode">
+  <h1>Clientes</h1>
+
+  <div class="actions">
+    <button class="btn primary" (click)="create()">Novo cliente</button>
+    <button class="btn ghost" (click)="reload()">Recarregar</button>
+  </div>
+
+  <div class="search">
+    <input type="text" placeholder="Pesquisar por nome, email ou CPF"
+           [(ngModel)]="filtro" />
+    <button class="btn primary" (click)="pesquisar()">Pesquisar</button>
+  </div>
+
+  <div *ngIf="loadingRanking" class="loading-ranking">
+    <small>Calculando ranking...</small>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>CPF</th>
+        <th>Ranking</th>
+        <th>Ativo</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of clientesFiltrados">
+        <td>{{ c.id }}</td>
+        <td>{{ c.nome }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.cpf }}</td>
+        <td>
+          <span *ngIf="c.ranking" [class]="getRankingBadgeClass(c.ranking.nivel)" [title]="'Pontos: ' + c.ranking.pontos + ' | Compras: ' + c.ranking.quantidadeCompras + ' | Total: R$ ' + (c.ranking.valorTotalGasto | number:'1.2-2')">
+            {{ getRankingEmoji(c.ranking.nivel) }} {{ c.ranking.nivel }} ({{ c.ranking.pontos }})
+          </span>
+          <span *ngIf="!c.ranking && !loadingRanking" class="ranking-badge ranking-none">
+            🥉 Sem ranking
+          </span>
+          <span *ngIf="!c.ranking && loadingRanking" class="ranking-badge ranking-loading">
+            ...
+          </span>
+        </td>
+        <td>{{ c.ativo ? 'Sim' : 'Não' }}</td>
+        <td>  
+            <button class="btn primary" (click)="c.id && edit(c.id)">Editar</button>
+            <button class="btn ghost" (click)="c.id && delete(c.id)">Excluir</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="clientesFiltrados.length === 0">
+        <td colspan="7" style="text-align: center; font-style: italic; color: gray;">
+          Nenhum cliente encontrado
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

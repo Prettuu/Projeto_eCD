@@ -1,0 +1,52 @@
+<div class="notifications-container">
+  <div class="notifications-header">
+    <h1>Notificações</h1>
+    <div class="header-actions">
+      <button 
+        *ngIf="unreadCount > 0" 
+        class="btn btn-secondary" 
+        (click)="markAllAsRead()">
+        Marcar todas como lidas
+      </button>
+      <button 
+        *ngIf="isAdmin" 
+        class="btn btn-primary" 
+        routerLink="/app/notifications/create">
+        ➕ Criar Notificação
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <p>Carregando notificações...</p>
+  </div>
+
+  <div *ngIf="!loading && notifications.length === 0" class="empty-state">
+    <div class="empty-icon">🔔</div>
+    <p>Nenhuma notificação disponível</p>
+  </div>
+
+  <div *ngIf="!loading && notifications.length > 0" class="notifications-list">
+    <div 
+      *ngFor="let notification of notifications" 
+      class="notification-item"
+      [class.unread]="!notification.lida"
+      [class.read]="notification.lida"
+      (click)="markAsRead(notification)">
+      
+      <div class="notification-icon" [class]="getTipoClass(notification.tipo)">
+        {{ getTipoIcon(notification.tipo) }}
+      </div>
+
+      <div class="notification-content">
+        <div class="notification-header">
+          <h3 class="notification-title">{{ notification.titulo }}</h3>
+          <span *ngIf="!notification.lida" class="unread-badge">Nova</span>
+        </div>
+        <p class="notification-message">{{ notification.mensagem }}</p>
+        <span class="notification-date">{{ formatDate(notification.createdAt) }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+

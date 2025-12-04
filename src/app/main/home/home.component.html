@@ -1,0 +1,160 @@
+<div class="home-container">
+  <div class="home-header">
+    <div class="header-content">
+      <h1 class="welcome-title">Bem-vindo, {{ userName || 'Usuário' }}! 👋</h1>
+      <p class="welcome-subtitle">Ao sistema de gerenciamento eCD</p>
+    </div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card" routerLink="/app/clients" *ngIf="userRole === 'ADMIN'">
+      <div class="card-icon">👥</div>
+      <h3>Clientes</h3>
+      <p>Gerencie seus clientes e informações</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+
+    <div class="card" routerLink="/app/stock" *ngIf="userRole === 'ADMIN'">
+      <div class="card-icon">📦</div>
+      <h3>Estoque</h3>
+      <p>Controle de produtos e inventário</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+
+    <div class="card" routerLink="/app/orders" *ngIf="userRole === 'ADMIN'">
+      <div class="card-icon">📋</div>
+      <h3>Pedidos</h3>
+      <p>Visualize e gerencie todos os pedidos</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+
+    <div class="card" routerLink="/app/profile" *ngIf="userRole === 'CLIENT'">
+      <div class="card-icon">👤</div>
+      <h3>Perfil</h3>
+      <p>Visualize e edite seus dados pessoais</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+
+    <div class="card" routerLink="/app/products" *ngIf="userRole === 'CLIENT'">
+      <div class="card-icon">🛍️</div>
+      <h3>Produtos</h3>
+      <p>Explore nossos produtos disponíveis</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+
+    <div class="card" routerLink="/app/orders" *ngIf="userRole === 'CLIENT'">
+      <div class="card-icon">📋</div>
+      <h3>Meus Pedidos</h3>
+      <p>Visualize o histórico dos seus pedidos</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+
+    <div class="card" routerLink="/app/cart" *ngIf="userRole === 'CLIENT'">
+      <div class="card-icon">🛒</div>
+      <h3>Carrinho</h3>
+      <p>Seus itens de compra</p>
+      <span class="card-badge">Disponível</span>
+    </div>
+  </div>
+
+  <div class="info-section" *ngIf="userRole === 'ADMIN'">
+    <div class="admin-cards-grid">
+      <div class="sales-yesterday-card" routerLink="/app/analysis">
+        <div class="card-content">
+          <div class="card-icon">📊</div>
+          <div class="card-text">
+            <h3>Vendas de Ontem</h3>
+            <p class="sales-value" *ngIf="!loadingVendas">{{ formatCurrency(vendasOntem) }}</p>
+            <p class="sales-value loading" *ngIf="loadingVendas">Carregando...</p>
+            <span class="card-link">Ver análise completa →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="notifications-card" routerLink="/app/notifications/create">
+        <div class="card-content">
+          <div class="card-icon">🔔</div>
+          <div class="card-text">
+            <h3>Criar Notificação</h3>
+            <p class="card-description">Envie novidades, cupons e alertas para os clientes</p>
+            <span class="card-link">Criar agora →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RN0027 - Ranking do Cliente -->
+  <div class="client-ranking-section" *ngIf="userRole === 'CLIENT'">
+    <div class="ranking-card">
+      <div class="ranking-header">
+        <div class="ranking-icon">🏆</div>
+        <h2>Seu Ranking</h2>
+      </div>
+      
+      <div *ngIf="loadingRanking" class="ranking-loading">
+        <p>Calculando seu ranking...</p>
+      </div>
+
+      <div *ngIf="!loadingRanking && clientRanking" class="ranking-content">
+        <div class="ranking-level">
+          <span [class]="getRankingBadgeClass(clientRanking.nivel)" class="ranking-badge-large">
+            {{ getRankingEmoji(clientRanking.nivel) }} {{ clientRanking.nivel }}
+          </span>
+          <p class="ranking-points">{{ clientRanking.pontos }} pontos</p>
+        </div>
+
+        <div class="ranking-stats">
+          <div class="stat-item">
+            <span class="stat-label">Compras</span>
+            <span class="stat-value">{{ clientRanking.quantidadeCompras }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Total Gasto</span>
+            <span class="stat-value">{{ formatCurrency(clientRanking.valorTotalGasto) }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Últimos 30 dias</span>
+            <span class="stat-value">{{ clientRanking.frequencia }} pedidos</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingRanking && !clientRanking" class="ranking-empty">
+        <p>Você ainda não possui ranking. Faça suas primeiras compras!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RNF0044 - Recomendações Personalizadas -->
+  <div class="recommendations-section" *ngIf="userRole === 'CLIENT'">
+    <div class="recommendations-card">
+      <div class="recommendations-header">
+        <div class="recommendations-icon">🤖</div>
+        <h2>Recomendados para Você</h2>
+        <p class="recommendations-subtitle">Baseado no seu histórico de compras e preferências</p>
+      </div>
+
+      <div *ngIf="loadingRecommendations" class="recommendations-loading">
+        <p>Carregando recomendações...</p>
+      </div>
+
+      <div *ngIf="!loadingRecommendations && recommendations.length > 0" class="recommendations-grid">
+        <div *ngFor="let rec of recommendations" class="recommendation-item" routerLink="/app/products">
+          <div class="recommendation-badge">⭐ Score: {{ rec.score }}</div>
+          <div class="recommendation-icon">💿</div>
+          <h3>{{ rec.titulo }}</h3>
+          <p class="recommendation-artist">{{ rec.artista }}</p>
+          <p class="recommendation-price">{{ formatCurrency(rec.valorVenda) }}</p>
+          <div class="recommendation-reasons">
+            <small *ngFor="let reason of rec.reasons.slice(0, 2)">{{ reason }}</small>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingRecommendations && recommendations.length === 0" class="recommendations-empty">
+        <p>Faça algumas compras para receber recomendações personalizadas!</p>
+      </div>
+    </div>
+  </div>
+</div>

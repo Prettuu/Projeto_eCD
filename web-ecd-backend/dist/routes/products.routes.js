@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ProductController_1 = require("../controllers/ProductController");
+const ProductAutoInactivationController_1 = require("../controllers/ProductAutoInactivationController");
+const router = (0, express_1.Router)();
+router.get('/', ProductController_1.ProductController.getAll);
+router.get('/admin', ProductController_1.ProductController.getAllAdmin);
+router.get('/:id', ProductController_1.ProductController.getById);
+router.post('/', ProductController_1.ProductController.create);
+router.put('/:id', ProductController_1.ProductController.update);
+router.delete('/:id', ProductController_1.ProductController.delete);
+router.patch('/:id/stock', ProductController_1.ProductController.updateStock);
+router.post('/auto-inactivation/run', ProductAutoInactivationController_1.ProductAutoInactivationController.runManually);
+router.get('/:id/auto-inactivation/check', ProductAutoInactivationController_1.ProductAutoInactivationController.checkProduct);
+exports.default = router;

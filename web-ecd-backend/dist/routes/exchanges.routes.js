@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ExchangeController_1 = require("../controllers/ExchangeController");
+const router = (0, express_1.Router)();
+router.get('/', ExchangeController_1.ExchangeController.getAll);
+router.get('/:id', ExchangeController_1.ExchangeController.getById);
+router.post('/', ExchangeController_1.ExchangeController.create);
+router.patch('/:id/status', ExchangeController_1.ExchangeController.updateStatus);
+router.post('/:id/confirm-received', ExchangeController_1.ExchangeController.confirmReceived);
+exports.default = router;

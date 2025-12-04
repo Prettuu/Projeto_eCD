@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const SalesAnalysisController_1 = require("../controllers/SalesAnalysisController");
+const router = (0, express_1.Router)();
+router.get('/products', SalesAnalysisController_1.SalesAnalysisController.compareProductsByDateRange);
+router.get('/products-by-date', SalesAnalysisController_1.SalesAnalysisController.getProductsByDate);
+router.get('/categories', SalesAnalysisController_1.SalesAnalysisController.compareCategoriesByDateRange);
+router.get('/categories-by-date', SalesAnalysisController_1.SalesAnalysisController.getCategoriesByDate);
+router.get('/summary', SalesAnalysisController_1.SalesAnalysisController.getSalesSummary);
+exports.default = router;

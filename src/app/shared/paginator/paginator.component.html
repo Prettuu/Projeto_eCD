@@ -1,0 +1,68 @@
+<section class="custom-paginator">
+  <div class="page-size" (click)="showPageSizeOptions = !showPageSizeOptions">
+    {{ startIndex + 1 }} - {{ endIndex }} de {{ totalElements }}
+  </div>
+
+  <div *ngIf="showPageSizeOptions" class="page-size-options">
+    <p>Itens por página</p>
+    <div class="options">
+      <button
+        *ngFor="let option of pageSizeOptions"
+        [class.active]="filter.size === option"
+        (click)="changePageSize(option)"
+      >
+        {{ option }}
+      </button>
+    </div>
+  </div>
+
+  <div class="paginator-nav">
+    <ng-container *ngFor="let item of paginatorIcons">
+      <ng-template [ngIf]="item.template === 'firstpagelinkicon'">
+        <button
+          [disabled]="filter.page === 0"
+          (click)="goToPage(0)"
+        >
+          <i [class]="item.icon"></i>
+        </button>
+      </ng-template>
+
+      <ng-template [ngIf]="item.template === 'previouspagelinkicon'">
+        <button
+          [disabled]="filter.page === 0"
+          (click)="goToPage(filter.page - 1)"
+        >
+          <i [class]="item.icon"></i>
+        </button>
+      </ng-template>
+
+      <ng-template [ngIf]="item.template === 'nextpagelinkicon'">
+        <button
+          [disabled]="filter.page >= totalPages - 1"
+          (click)="goToPage(filter.page + 1)"
+        >
+          <i [class]="item.icon"></i>
+        </button>
+      </ng-template>
+
+      <ng-template [ngIf]="item.template === 'lastpagelinkicon'">
+        <button
+          [disabled]="filter.page >= totalPages - 1"
+          (click)="goToPage(totalPages - 1)"
+        >
+          <i [class]="item.icon"></i>
+        </button>
+      </ng-template>
+    </ng-container>
+
+    <ng-container *ngFor="let p of visiblePages">
+      <button
+        [class.active]="filter.page === p"
+        (click)="goToPage(p)"
+      >
+        {{ p + 1 }}
+      </button>
+    </ng-container>
+
+  </div>
+</section>

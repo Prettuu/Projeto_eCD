@@ -1,0 +1,244 @@
+<div class="analysis-container" *ngIf="formInitialized">
+  <header class="analysis-header">
+    <h1>📊 Análise de Vendas</h1>
+    <p class="subtitle">RF0055 - Histórico de vendas e relatórios</p>
+  </header>
+
+  <!-- Filtros de Data -->
+  <section class="filters-section">
+    <form [formGroup]="dateForm" (ngSubmit)="loadData()" class="date-form">
+      <div class="form-group">
+        <label for="startDate">Data Inicial:</label>
+        <input
+          type="date"
+          id="startDate"
+          formControlName="startDate"
+          (change)="onDateChange()"
+          class="date-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="endDate">Data Final:</label>
+        <input
+          type="date"
+          id="endDate"
+          formControlName="endDate"
+          (change)="onDateChange()"
+          class="date-input"
+        />
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="dateForm.invalid || loading">
+        🔍 Buscar
+      </button>
+    </form>
+  </section>
+
+  <!-- Período Atual -->
+  <div *ngIf="currentPeriod" class="current-period">
+    📅 Período: {{ currentPeriod.startDate }} até {{ currentPeriod.endDate }}
+  </div>
+
+  <!-- Mensagem de Erro -->
+  <div *ngIf="error" class="error-message">
+    ⚠️ {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" *ngIf="!loading">
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'summary'"
+      (click)="setActiveTab('summary')"
+    >
+      📈 Resumo
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'products'"
+      (click)="setActiveTab('products')"
+    >
+      💿 Produtos
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'categories'"
+      (click)="setActiveTab('categories')"
+    >
+      🏷️ Categorias
+    </button>
+  </div>
+
+  <!-- Conteúdo das Tabs -->
+  <div class="tab-content" *ngIf="!loading">
+    <!-- Resumo -->
+    <section *ngIf="activeTab === 'summary'" class="summary-section">
+      <div *ngIf="!summaryData" class="empty-state">
+        <p>Nenhum dado disponível. Selecione um período e clique em "Buscar".</p>
+      </div>
+      <div *ngIf="summaryData" class="summary-cards">
+        <div class="summary-card">
+          <div class="card-icon">📦</div>
+          <div class="card-content">
+            <h3>Total de Pedidos</h3>
+            <p class="card-value">{{ formatNumber(summaryData.summary.totalOrders) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">💰</div>
+          <div class="card-content">
+            <h3>Receita Total</h3>
+            <p class="card-value">{{ formatCurrency(summaryData.summary.totalRevenue) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">🎁</div>
+          <div class="card-content">
+            <h3>Descontos</h3>
+            <p class="card-value">{{ formatCurrency(summaryData.summary.totalDiscount) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">📊</div>
+          <div class="card-content">
+            <h3>Itens Vendidos</h3>
+            <p class="card-value">{{ formatNumber(summaryData.summary.totalItemsSold) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">💿</div>
+          <div class="card-content">
+            <h3>Produtos Únicos</h3>
+            <p class="card-value">{{ formatNumber(summaryData.summary.uniqueProductsSold) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">📈</div>
+          <div class="card-content">
+            <h3>Ticket Médio</h3>
+            <p class="card-value">{{ formatCurrency(summaryData.summary.averageOrderValue) }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Produtos -->
+    <section *ngIf="activeTab === 'products'" class="products-section">
+      <h2>Vendas por Produto</h2>
+      
+      <!-- Gráfico de Linhas -->
+      <div *ngIf="productsData.length > 0" class="chart-container">
+        <h3>📈 Gráfico de Vendas por Produto</h3>
+        <div class="chart-wrapper">
+          <canvas baseChart
+                  [type]="chartType"
+                  [data]="chartData"
+                  [options]="chartOptions">
+          </canvas>
+        </div>
+        <p class="chart-note">📊 Linha mostra a quantidade vendida de cada produto. Passe o mouse para ver valores detalhados.</p>
+      </div>
+
+      <div *ngIf="productsData.length === 0" class="empty-state">
+        <p>Nenhum produto vendido no período selecionado.</p>
+      </div>
+      <div *ngIf="productsData.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Produto</th>
+              <th>Artista</th>
+              <th>Categoria</th>
+              <th>Qtd. Vendida</th>
+              <th>Pedidos</th>
+              <th>Valor Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of productsData; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td class="product-title">{{ product.titulo }}</td>
+              <td>{{ product.artista }}</td>
+              <td><span class="badge">{{ product.categoria }}</span></td>
+              <td class="number">{{ formatNumber(product.quantidadeVendida) }}</td>
+              <td class="number">{{ formatNumber(product.quantidadePedidos) }}</td>
+              <td class="currency">{{ formatCurrency(product.valorTotal) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Categorias -->
+    <section *ngIf="activeTab === 'categories'" class="categories-section">
+      <h2>Vendas por Categoria</h2>
+      
+      <!-- Gráfico de Linhas -->
+      <div *ngIf="categoriesData.length > 0" class="chart-container">
+        <h3>📈 Gráfico de Vendas por Categoria</h3>
+        <div class="chart-wrapper">
+          <canvas baseChart
+                  [type]="chartType"
+                  [data]="chartData"
+                  [options]="chartOptions">
+          </canvas>
+        </div>
+        <p class="chart-note">📊 Linha mostra o valor total de vendas de cada categoria. Passe o mouse para ver valores detalhados.</p>
+      </div>
+
+      <div *ngIf="categoriesData.length === 0" class="empty-state">
+        <p>Nenhuma categoria com vendas no período selecionado.</p>
+      </div>
+      <div *ngIf="categoriesData.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Categoria</th>
+              <th>Qtd. Vendida</th>
+              <th>Pedidos</th>
+              <th>Produtos Únicos</th>
+              <th>Valor Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let category of categoriesData; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td><span class="badge category-badge">{{ category.categoria }}</span></td>
+              <td class="number">{{ formatNumber(category.quantidadeVendida) }}</td>
+              <td class="number">{{ formatNumber(category.quantidadePedidos) }}</td>
+              <td class="number">{{ formatNumber(category.quantidadeProdutos) }}</td>
+              <td class="currency">{{ formatCurrency(category.valorTotal) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Detalhes dos Produtos por Categoria -->
+        <div class="category-details" *ngFor="let category of categoriesData">
+          <details class="category-detail">
+            <summary>
+              <strong>{{ category.categoria }}</strong> - Ver produtos ({{ category.produtos.length }})
+            </summary>
+            <div class="products-list">
+              <span *ngFor="let produto of category.produtos" class="product-tag">
+                {{ produto }}
+              </span>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+

@@ -1,0 +1,103 @@
+<div class="cart-container">
+  <header class="cart-header">
+    <h1>🛒 Carrinho</h1>
+  </header>
+
+  <div *ngIf="state.items.length; else vazio" class="cart-content">
+    <section class="cart-items">
+      <h2 class="section-title">Itens no Carrinho</h2>
+      
+      <div class="items-list">
+        <div *ngFor="let it of state.items" class="cart-item">
+          <div class="item-icon">💿</div>
+          
+          <div class="item-info">
+            <h3 class="item-title">{{ it.titulo }}</h3>
+            <div class="item-details">
+              <span class="item-price">R$ {{ it.valorUnitario | number: '1.2-2' }}</span>
+              <span class="item-unit">cada</span>
+            </div>
+          </div>
+          
+          <div class="item-quantity">
+            <label class="quantity-label">Quantidade:</label>
+            <input
+              type="number"
+              min="0"
+              class="quantity-input"
+              [ngModel]="it.quantidade"
+              (ngModelChange)="updateQty(it, $event)"
+            />
+          </div>
+          
+          <div class="item-subtotal">
+            <span class="subtotal-label">Subtotal:</span>
+            <span class="subtotal-value">R$ {{ (it.valorUnitario * it.quantidade) | number: '1.2-2' }}</span>
+          </div>
+          
+          <div class="item-actions">
+            <button class="btn-remove" (click)="remove(it)" title="Remover item">
+              🗑️ Remover
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="cart-summary">
+      <div class="summary-card">
+        <h3 class="summary-title">Resumo do Pedido</h3>
+        
+        <div class="summary-line">
+          <span class="summary-label">Subtotal:</span>
+          <span class="summary-value">R$ {{ state.subtotal | number: '1.2-2' }}</span>
+        </div>
+        
+        <div *ngIf="state.desconto && state.desconto > 0" class="summary-line discount">
+          <span class="summary-label">Desconto:</span>
+          <span class="summary-value discount-value">- R$ {{ state.desconto | number: '1.2-2' }}</span>
+        </div>
+        
+        <div *ngIf="state.cupom" class="summary-line">
+          <span class="summary-label">Cupom aplicado:</span>
+          <span class="summary-value coupon-badge">{{ state.cupom }}</span>
+        </div>
+        
+        <div class="summary-line">
+          <span class="summary-label">Frete:</span>
+          <span class="summary-value">R$ {{ (state.frete || 0) | number: '1.2-2' }}</span>
+        </div>
+        
+        <div class="summary-divider"></div>
+        
+        <div class="summary-line total">
+          <span class="summary-label">Total:</span>
+          <span class="summary-value total-value">R$ {{ state.totalComDesconto | number: '1.2-2' }}</span>
+        </div>
+        
+        <div class="summary-actions">
+          <button
+            class="btn primary checkout-btn"
+            (click)="goCheckout()"
+            [disabled]="!state.items.length || !state.clientId">
+            ✨ Finalizar Compra
+          </button>
+          <button class="btn ghost clear-btn" (click)="clear()">
+            🗑️ Limpar Carrinho
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <ng-template #vazio>
+    <div class="empty-cart">
+      <div class="empty-icon">🛒</div>
+      <h2>Seu carrinho está vazio</h2>
+      <p>Adicione produtos para começar suas compras!</p>
+      <button class="btn primary" routerLink="/app/products">
+        Ver Produtos
+      </button>
+    </div>
+  </ng-template>
+</div>

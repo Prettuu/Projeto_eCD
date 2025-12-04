@@ -1,0 +1,118 @@
+<h1>{{ id ? 'Editar CD' : 'Novo CD' }}</h1>
+
+<form [formGroup]="form" (ngSubmit)="save()" novalidate class="form-grid">
+  <label>
+    Título
+    <input type="text" formControlName="titulo" />
+  </label>
+
+  <label>
+    Artista
+    <input type="text" formControlName="artista" />
+  </label>
+
+  <label>
+    Ano
+    <input type="number" formControlName="ano" />
+  </label>
+
+  <label>
+    Categoria
+    <select formControlName="categoria">
+      <option value="">Selecione uma categoria</option>
+      <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+    </select>
+  </label>
+
+  <label>
+    Quantidade em estoque
+    <input type="number" formControlName="estoque" />
+  </label>
+
+  <label>
+    Valor de Custo
+    <input type="number" formControlName="valorCusto" step="0.01" />
+    <small style="color: #666; font-size: 0.85em;">O valor de venda será calculado automaticamente (+30%)</small>
+  </label>
+
+  <label>
+    Valor de Venda
+    <input type="number" formControlName="valorVenda" step="0.01" />
+    <small style="color: #666; font-size: 0.85em;">Pode ser ajustado manualmente se necessário</small>
+  </label>
+
+  <label class="switch">
+    Ativo
+    <input type="checkbox" formControlName="ativo" />
+  </label>
+
+  <!-- RN0011 - Campos adicionais -->
+  <h2 style="grid-column: 1 / -1; margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">Informações Adicionais</h2>
+
+  <label>
+    Gênero
+    <input type="text" formControlName="genero" placeholder="Ex: Rock, Pop, Sertanejo..." />
+  </label>
+
+  <label>
+    Gravadora
+    <input type="text" formControlName="gravadora" />
+  </label>
+
+  <label>
+    Edição
+    <input type="text" formControlName="edicao" placeholder="Ex: Edição Especial, Deluxe..." />
+  </label>
+
+  <label>
+    Código de Barras
+    <input type="text" formControlName="codigoBarras" />
+  </label>
+
+  <label>
+    Número de Faixas
+    <input type="number" formControlName="numeroFaixas" min="0" />
+  </label>
+
+  <label>
+    Duração
+    <input type="text" formControlName="duracao" placeholder="Ex: 45:30 ou 01:15:30" />
+  </label>
+
+  <label>
+    Grupo de Precificação
+    <input type="text" formControlName="grupoPrecificacao" placeholder="Ex: Premium, Standard..." />
+  </label>
+
+  <label style="grid-column: 1 / -1;">
+    Sinopse
+    <textarea formControlName="sinopse" rows="4" placeholder="Descrição do CD..."></textarea>
+  </label>
+
+  <div style="grid-column: 1 / -1; border: 1px solid #ddd; padding: 1rem; border-radius: 4px;">
+    <h3 style="margin-top: 0;">Dimensões</h3>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+      <label>
+        Altura (cm)
+        <input type="number" formControlName="dimensoes.altura" step="0.01" min="0" />
+      </label>
+      <label>
+        Largura (cm)
+        <input type="number" formControlName="dimensoes.largura" step="0.01" min="0" />
+      </label>
+      <label>
+        Peso (g)
+        <input type="number" formControlName="dimensoes.peso" step="0.01" min="0" />
+      </label>
+      <label>
+        Profundidade (cm)
+        <input type="number" formControlName="dimensoes.profundidade" step="0.01" min="0" />
+      </label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn ghost" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="btn primary">Salvar</button>
+  </div>
+</form>

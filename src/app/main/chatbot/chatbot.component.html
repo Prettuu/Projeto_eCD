@@ -1,0 +1,48 @@
+<div class="chatbot-container">
+  <button class="chatbot-toggle" (click)="toggleChat()" [class.open]="isOpen">
+    <span class="chatbot-icon">💬</span>
+    <span class="chatbot-badge" *ngIf="!isOpen">🤖</span>
+  </button>
+
+  <div class="chatbot-window" *ngIf="isOpen">
+    <div class="chatbot-header">
+      <div class="chatbot-header-content">
+        <span class="chatbot-icon-header">🤖</span>
+        <div>
+          <h3>Assistente Virtual</h3>
+          <p>Como posso ajudar?</p>
+        </div>
+      </div>
+      <button class="chatbot-close" (click)="toggleChat()">×</button>
+    </div>
+
+    <div class="chat-messages">
+      <div *ngFor="let msg of messages" [class]="msg.isUser ? 'message user' : 'message bot'">
+        <div class="message-content">
+          <p *ngIf="msg.isUser">{{ msg.message }}</p>
+          <p *ngIf="!msg.isUser">{{ msg.response }}</p>
+          <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
+        </div>
+      </div>
+      <div *ngIf="loading" class="message bot">
+        <div class="message-content">
+          <p class="typing">Digitando...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chatbot-input">
+      <input
+        type="text"
+        [(ngModel)]="currentMessage"
+        (keyup.enter)="sendMessage()"
+        placeholder="Digite sua mensagem..."
+        [disabled]="loading"
+      />
+      <button (click)="sendMessage()" [disabled]="!currentMessage.trim() || loading">
+        ➤
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,250 @@
+<h1>Formulário de Clientes</h1>
+<h2>{{id ? "Editar" : "Criar"}}</h2>
+
+<form [formGroup]="clientForm" (ngSubmit)="onSubmit()" novalidate class="unified-form">
+
+  <section class="form-section">
+    <h3 class="section-title">
+      <span class="section-icon">1</span>
+      Dados do Cliente
+    </h3>
+
+    <div class="grid">
+      <div class="field">
+        <label for="genero">Gênero</label>
+        <select id="genero" formControlName="genero">
+          <option [ngValue]="null" disabled>Selecione...</option>
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="nome">Nome completo</label>
+        <input id="nome" type="text" formControlName="nome" placeholder="Ex.: Maria Silva" />
+      </div>
+
+      <div class="field">
+        <label for="nascimento">Data de nascimento</label>
+        <input id="nascimento" type="date" formControlName="dataNascimento" />
+      </div>
+
+      <div class="field">
+        <label for="cpf">CPF</label>
+        <input id="cpf" type="text" formControlName="cpf" placeholder="00000000000" />
+      </div>
+
+      <div class="field col-2" formGroupName="telefone">
+        <label>Telefone</label>
+        <div class="phone-row">
+          <select formControlName="tipo">
+            <option [ngValue]="null" disabled>Tipo</option>
+            <option value="celular">Celular</option>
+            <option value="fixo">Residencial</option>
+            <option value="comercial">Comercial</option>
+          </select>
+          <input type="text" formControlName="ddd" maxlength="2" placeholder="DDD" />
+          <input type="text" formControlName="numero" maxlength="9" placeholder="Número" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" formControlName="email" placeholder="seuemail@dominio.com" />
+      </div>
+
+      <div class="field">
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" formControlName="senha" placeholder="Mínimo 6 caracteres, com maiúscula, minúscula, número e caractere especial" />
+        <small *ngIf="clientForm.get('senha')?.hasError('passwordWeak') && clientForm.get('senha')?.touched" class="error-message">
+          Senha deve conter: maiúscula, minúscula, número e caractere especial
+        </small>
+      </div>
+
+      <div class="field switch">
+        <label for="ativo">Ativo</label>
+        <input id="ativo" type="checkbox" formControlName="ativo" />
+      </div>
+    </div>
+
+  </section>
+
+  <section class="form-section">
+    <h3 class="section-title">
+      <span class="section-icon">2</span>
+      Endereços
+    </h3>
+
+    <fieldset formGroupName="enderecoResidencial" class="address-group">
+      <legend class="fieldset-legend">Endereço Residencial</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Logradouro</label>
+          <input formControlName="logradouro" placeholder="Rua, Avenida, etc." />
+        </div>
+        <div class="field">
+          <label>Número</label>
+          <input formControlName="numero" placeholder="Número" />
+        </div>
+        <div class="field">
+          <label>Bairro</label>
+          <input formControlName="bairro" placeholder="Bairro" />
+        </div>
+        <div class="field">
+          <label>CEP</label>
+          <input formControlName="cep" placeholder="00000-000" />
+        </div>
+        <div class="field">
+          <label>Cidade</label>
+          <input formControlName="cidade" placeholder="Cidade" />
+        </div>
+        <div class="field">
+          <label>Estado</label>
+          <input formControlName="estado" placeholder="Estado" />
+        </div>
+        <div class="field">
+          <label>País</label>
+          <input formControlName="pais" placeholder="País" />
+        </div>
+        <div class="field col-2">
+          <label>Observações</label>
+          <textarea formControlName="observacoes" placeholder="Observações adicionais"></textarea>
+        </div>
+        <div class="field switch">
+          <label for="isCobranca">Usar como endereço de cobrança</label>
+          <input id="isCobranca" type="checkbox" formControlName="isCobranca" />
+        </div>
+      </div>
+    </fieldset>
+
+    <div formArrayName="enderecosEntrega" class="address-array">
+      <div class="section-subtitle">
+        <h4>Endereços de Entrega</h4>
+        <button type="button" class="btn-add" (click)="addEnderecoEntrega()">
+          + Adicionar Endereço
+        </button>
+      </div>
+      
+      <div *ngFor="let end of enderecosEntrega.controls; let i = index" [formGroupName]="i" class="address-item">
+        <div class="address-header">
+          <h4>Endereço {{ i + 1 }}</h4>
+          <button type="button" class="btn-remove" (click)="removeEnderecoEntrega(i)">Remover</button>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label>Logradouro</label>
+            <input formControlName="logradouro" placeholder="Rua, Avenida, etc." />
+          </div>
+          <div class="field">
+            <label>Número</label>
+            <input formControlName="numero" placeholder="Número" />
+          </div>
+          <div class="field">
+            <label>Bairro</label>
+            <input formControlName="bairro" placeholder="Bairro" />
+          </div>
+          <div class="field">
+            <label>CEP</label>
+            <input formControlName="cep" placeholder="00000-000" />
+          </div>
+          <div class="field">
+            <label>Cidade</label>
+            <input formControlName="cidade" placeholder="Cidade" />
+          </div>
+          <div class="field">
+            <label>Estado</label>
+            <input formControlName="estado" placeholder="Estado" />
+          </div>
+          <div class="field">
+            <label>País</label>
+            <input formControlName="pais" placeholder="País" />
+          </div>
+          <div class="field col-2">
+            <label>Observações</label>
+            <textarea formControlName="observacoes" placeholder="Observações adicionais"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <h3 class="section-title">
+      <span class="section-icon">3</span>
+      Cartões de Crédito
+    </h3>
+
+    <div formArrayName="cartoes" class="cards-array">
+      <div class="section-subtitle">
+        <h4>Cartões Cadastrados</h4>
+        <button 
+          *ngIf="cartoes.length > 0" 
+          type="button" 
+          class="btn-add" 
+          (click)="addCartao()">
+          + Adicionar Cartão
+        </button>
+      </div>
+
+      <div *ngFor="let cartao of cartoes.controls; let i = index" [formGroupName]="i" class="card-item">
+        <div class="card-header">
+          <h4>Cartão {{ i + 1 }}</h4>
+          <button 
+            *ngIf="cartoes.length > 1" 
+            type="button" 
+            class="btn-remove" 
+            (click)="removeCartao(i)">
+            Remover
+          </button>
+        </div>
+        <div class="grid">
+          <div class="field col-2">
+            <label>Número do cartão</label>
+            <input formControlName="numero" placeholder="0000 0000 0000 0000" />
+          </div>
+          <div class="field">
+            <label>Nome impresso</label>
+            <input formControlName="nomeImpresso" placeholder="Nome como no cartão" />
+          </div>
+          <div class="field">
+            <label>Bandeira</label>
+            <select formControlName="bandeira">
+              <option value="">Selecione</option>
+              <option value="Visa">Visa</option>
+              <option value="MasterCard">MasterCard</option>
+              <option value="Elo">Elo</option>
+              <option value="American Express">American Express</option>
+              <option value="Hipercard">Hipercard</option>
+            </select>
+            <small *ngIf="cartao.get('bandeira')?.hasError('bandeiraInvalida') && cartao.get('bandeira')?.touched" class="error-message">
+              Bandeira não permitida
+            </small>
+          </div>
+          <div class="field">
+            <label>Código de segurança</label>
+            <input formControlName="codigoSeguranca" placeholder="CVV" maxlength="4" />
+          </div>
+          <div class="field switch">
+            <label for="preferencial-{{i}}">Cartão preferencial</label>
+            <input id="preferencial-{{i}}" type="checkbox" formControlName="preferencial" />
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="cartoes.length === 0" class="empty-state">
+        <p>Nenhum cartão cadastrado.</p>
+        <button type="button" class="btn-add" (click)="addCartao()">
+          + Adicionar Cartão
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button type="button" class="btn ghost" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="btn primary" [disabled]="clientForm.invalid">
+      {{ id ? 'Atualizar' : 'Salvar' }}
+    </button>
+  </div>
+</form>
