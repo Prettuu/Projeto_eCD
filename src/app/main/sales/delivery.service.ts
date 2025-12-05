@@ -172,14 +172,14 @@ export class DeliveryService {
     return new Promise((resolve) => {
 
       setTimeout(() => {
-        const baseShipping = 15; // R$ 15 base
-        const weightFactor = Math.ceil(totalWeight / 1000) * 5; // R$ 5 por kg
+        const baseShipping = 15;
+        const weightFactor = Math.ceil(totalWeight / 1000) * 5;
         const shipping = baseShipping + weightFactor;
 
         const carriers = ['Correios', 'Transportadora ABC', 'Logística XYZ'];
         const carrier = carriers[Math.floor(Math.random() * carriers.length)];
 
-        const deliveryDays = Math.floor(Math.random() * 5) + 3; // 3 a 7 dias
+        const deliveryDays = Math.floor(Math.random() * 5) + 3;
 
         resolve({
           value: shipping,

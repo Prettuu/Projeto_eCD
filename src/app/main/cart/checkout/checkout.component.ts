@@ -51,7 +51,7 @@ export class CheckoutComponent implements OnInit {
       numero: ['', Validators.required],
       complemento: [''],
       cupom: [''],
-      paymentType: ['ONE', Validators.required], // 'ONE' or 'TWO'
+      paymentType: ['ONE', Validators.required],
       cardId: [null],
       cardId2: [null],
       amount1: [null],
@@ -70,7 +70,6 @@ export class CheckoutComponent implements OnInit {
     setTimeout(() => {
       this.loadClientCards();
       
-      // Restore payment state if returning from profile/edit
       const checkoutReturn = sessionStorage.getItem('checkout_return');
       if (checkoutReturn) {
         try {
@@ -205,7 +204,6 @@ loadClientCards(): void {
 
       const total = resumo.totalComDesconto ?? resumo.subtotal;
 
-      // build payment payload
       const paymentType = this.form.get('paymentType')?.value;
       let payment: any = { type: paymentType };
 
@@ -260,7 +258,6 @@ loadClientCards(): void {
             return;
           }
 
-          // show confirmation based on payment
           const paymentPayload = this.form.get('paymentType')?.value === 'ONE'
             ? this.form.get('cardId')?.value
             : `${this.form.get('cardId')?.value} + ${this.form.get('cardId2')?.value}`;
@@ -294,22 +291,17 @@ loadClientCards(): void {
   onPaymentTypeChange(): void {
     const paymentType = this.form.get('paymentType')?.value;
 
-    // Update validators based on payment type
     if (paymentType === 'ONE') {
-      // Single card mode: cardId required, cardId2 optional
       this.form.get('cardId')?.setValidators([Validators.required]);
       this.form.get('cardId2')?.clearValidators();
-      // Clear values for two-card fields
       this.form.get('cardId2')?.setValue(null);
       this.form.get('amount1')?.setValue(null);
       this.form.get('amount2')?.setValue(null);
     } else if (paymentType === 'TWO') {
-      // Two-card mode: both cards required
       this.form.get('cardId')?.setValidators([Validators.required]);
       this.form.get('cardId2')?.setValidators([Validators.required]);
     }
 
-    // Update form validity
     this.form.get('cardId')?.updateValueAndValidity();
     this.form.get('cardId2')?.updateValueAndValidity();
   }
@@ -320,7 +312,6 @@ loadClientCards(): void {
     const paymentType = this.form.get('paymentType')?.value;
     const clientId = this.state.clientId;
 
-    // Handle NEW_CARD selection for cardId (single or two-card mode)
     if (cardId === 'NEW_CARD') {
       if (clientId) {
         this.form.get('cardId')?.clearValidators();
@@ -340,12 +331,10 @@ loadClientCards(): void {
         this.form.get('cardId')?.setValue(null);
       }
     } else {
-      // cardId is always required when not NEW_CARD, regardless of payment type
       this.form.get('cardId')?.setValidators([Validators.required]);
       this.form.get('cardId')?.updateValueAndValidity();
     }
 
-    // Handle NEW_CARD selection for cardId2 (two-card mode only)
     if (cardId2 === 'NEW_CARD') {
       if (clientId) {
         this.form.get('cardId2')?.clearValidators();
@@ -365,7 +354,6 @@ loadClientCards(): void {
         this.form.get('cardId2')?.setValue(null);
       }
     } else {
-      // cardId2 is only required when paymentType is 'TWO'
       if (paymentType === 'TWO') {
         this.form.get('cardId2')?.setValidators([Validators.required]);
       } else {

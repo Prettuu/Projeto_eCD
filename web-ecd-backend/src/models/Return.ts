@@ -8,7 +8,7 @@ export class Return extends Model {
   public id!: number;
   public orderId!: number;
   public clientId!: number;
-  public status!: string; // PENDENTE, APROVADA, NEGADA, RECEBIDA, PROCESSANDO, CONCLUIDA, CANCELADA
+  public status!: string;
   public motivo!: string;
   public observacoes?: string;
   public receivedAt?: Date | null;

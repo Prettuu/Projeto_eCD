@@ -45,11 +45,8 @@ export class ClientsComponent implements OnInit {
     }
   }
 
-  /**
-   * RN0027 - Calcula o ranking de todos os clientes baseado em pedidos
-   */
   private calculateRanking(): void {
-    if (this.isProfileMode) return; // Não calcular em modo perfil
+    if (this.isProfileMode) return;
     
     this.loadingRanking = true;
     

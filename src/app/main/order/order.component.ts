@@ -14,7 +14,7 @@ import { Return } from '../../shared/model/sales/return';
 })
 export class OrderComponent implements OnInit {
   orders: Order[] = [];
-  isProfileMode = false; // If true, show only current user's orders
+  isProfileMode = false;
   exchanges: Exchange[] = [];
   returns: Return[] = [];
   orderExchangesMap: Map<number, Exchange[]> = new Map();

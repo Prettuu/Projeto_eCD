@@ -18,12 +18,12 @@ export type OrderStatus =
   | 'TRANSPORTE'
   | 'ENTREGUE'
   | 'CANCELADO'
-  | 'DEVOLVIDO'; // Status interno (admin) - exibido como CANCELADO para user
+  | 'DEVOLVIDO';
 
 export interface OrderItem {
-  id?: number; // ID do OrderItem no banco
-  cdId?: number; // Frontend
-  productId?: number; // Backend
+  id?: number;
+  cdId?: number;
+  productId?: number;
   titulo: string;
   quantidade: number;
   valorUnitario: number;
@@ -33,7 +33,7 @@ export interface OrderItem {
 export interface Order {
   id: number;
   clientId: number;
-  clientName?: string; // Opcional pois backend não retorna
+  clientName?: string;
   items: OrderItem[];
   total: number;
   desconto?: number;
@@ -90,7 +90,7 @@ export class OrderService {
     TRANSPORTE: ['ENTREGUE', 'CANCELADO'],
     ENTREGUE: [],
     CANCELADO: [],
-    DEVOLVIDO: [], // Status final - não pode mudar
+    DEVOLVIDO: [],
   };
 
   constructor(
@@ -133,7 +133,7 @@ export class OrderService {
       const quantidade = Number(item.quantidade) || 0;
       
       return {
-        id: item.id, // ID do OrderItem
+        id: item.id,
         cdId: item.productId,
         productId: item.productId,
         titulo: item.titulo || '',
@@ -148,7 +148,7 @@ export class OrderService {
     return {
       id: backend.id,
       clientId: backend.clientId,
-      clientName: undefined, // Backend não retorna clientName
+      clientName: undefined,
       items: mappedItems,
       total: Number(backend.total),
       desconto: Number(backend.desconto || 0),
@@ -197,7 +197,6 @@ export class OrderService {
     );
   }
 
-  // allow optional `payment` payload (sent to backend for validation/processing)
   create(order: Omit<Order, 'id' | 'createdAt' | 'status' | 'paymentStatus'> & { payment?: any }): Observable<Order> {
 
     const items = order.items.map(item => ({

@@ -38,18 +38,15 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
     codigoSeguranca: '123'
   };
 
-  // ---------- Helpers ----------
   const goLoginAndClickPrimeiroAcesso = () => {
     cy.visit('/login');
     cy.wait(800);
     cy.window().then((win) => cy.stub(win, 'alert').as('alertStub'));
-    // Se existir o botão/link "Primeiro acesso", clicar para ir ao cadastro
     cy.get('body').then($b => {
       const btn = $b.find('a:contains("Primeiro acesso"), button:contains("Primeiro acesso"), a:contains("Primeiro Acesso"), button:contains("Primeiro Acesso")');
       if (btn.length) {
         cy.wrap(btn.first()).click({ force: true });
       } else {
-        // se não houver, ir direto para rota de cadastro
         cy.visit('/register/create');
       }
     });
@@ -75,7 +72,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
     cy.get('input[formcontrolname="estado"]').first().type(cliente.endereco.estado);
     cy.get('input[formcontrolname="pais"]').first().type(cliente.endereco.pais);
 
-    // Preenche um cartão no momento do cadastro (se existir o bloco)
     cy.contains('label', 'Número do cartão').parent().find('input[formcontrolname="numero"]').then($i => {
       if ($i.length) {
         cy.wrap($i).clear().type('4111111111111111', { delay: 10 });
@@ -96,7 +92,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
     cy.get('input#senha, input[type="password"]').clear().type(cliente.senha);
     cy.contains('button', /entrar/i).click();
     cy.url({ timeout: 10000 }).should('include', '/app');
-    // popular localStorage p/ clientId se necessário
     cy.window().then(win => {
       const userEmail = win.localStorage.getItem('userEmail');
       const clientId = win.localStorage.getItem('clientId');
@@ -115,7 +110,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
     
     cy.get('.product-card', { timeout: 10000 }).should('have.length.at.least', 1);
     
-    // Obter clientId e productId primeiro
     cy.window().then((win) => {
       const clientId = win.localStorage.getItem('clientId') || win.localStorage.getItem('userId');
       cy.log(` ClientId: ${clientId || 'NÃO ENCONTRADO'}`);
@@ -123,14 +117,12 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
       if (!clientId) {
         cy.log(' ClientId não encontrado - aguardando...');
         cy.wait(5000);
-        // Tentar novamente após espera
         const newClientId = win.localStorage.getItem('clientId') || win.localStorage.getItem('userId');
         if (!newClientId) {
           throw new Error('ClientId não encontrado após espera');
         }
       }
       
-      // Obter o primeiro produto da API para ter certeza do ID
       cy.request('GET', 'http://localhost:3000/api/products').then((productsResp) => {
         expect(productsResp.status).to.eq(200);
         const produtos = productsResp.body;
@@ -142,15 +134,12 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
         
         cy.log(` Produto selecionado: ${primeiroProduto.titulo || primeiroProduto.nome} (ID: ${produtoId})`);
         
-        // Interceptar alerts
         cy.window().then((win) => {
           cy.stub(win, 'alert').as('alertStub');
         });
         
-        // Interceptar requisição POST para monitorar
         cy.intercept('POST', '**/api/cart/**').as('addToCart');
         
-        // Tentar adicionar via UI primeiro
         cy.log(' Tentando adicionar via interface...');
         cy.get('.product-card').first().within(() => {
           cy.contains('button', /adicionar ao carrinho/i, { timeout: 20000 })
@@ -159,10 +148,8 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
             .click({ force: true });
         });
         
-        // Aguardar um pouco para a requisição acontecer
         cy.wait(3000);
         
-        // Verificar no banco se foi adicionado
         if (!clientIdFinal) {
           throw new Error('ClientId não disponível');
         }
@@ -171,7 +158,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
           const itemCount = cartResp.body?.items?.length || 0;
           cy.log(` Itens no banco após tentativa UI: ${itemCount}`);
           
-          // Se não foi adicionado, adicionar diretamente via API
           if (itemCount === 0) {
             cy.log(' Item não foi adicionado via UI - adicionando diretamente via API...');
             
@@ -194,7 +180,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
               }
             });
             
-            // Verificar novamente após adicionar via API
             cy.wait(1000);
             cy.request('GET', `http://localhost:3000/api/cart?clientId=${clientIdFinal}`).then((verifyResp) => {
               const finalCount = verifyResp.body?.items?.length || 0;
@@ -214,9 +199,8 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
 
   const garantirCarrinhoComItem = () => {
     cy.visit('/app/cart');
-    cy.wait(5000); // tempo extra para carregar Angular e CartService
+    cy.wait(5000); 
   
-    // Verificar se há itens no carrinho visualmente
     cy.get('body', { timeout: 10000 }).then(($b) => {
       const temItens = $b.find('.cart-item, table tbody tr').length > 0;
       const temVazio = $b.find('.empty-cart, [class*="empty"], [class*="vazio"]').length > 0;
@@ -234,7 +218,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
           cy.log(` ClientId: ${clientId || 'NÃO ENCONTRADO'}`);
           
           if (clientId) {
-            // Verificar se há itens no banco
             cy.request({
               method: 'GET',
               url: `http://localhost:3000/api/cart?clientId=${clientId}`,
@@ -244,26 +227,21 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
               cy.log(` Itens encontrados via API: ${items.length}`);
               
               if (items.length === 0) {
-                // Não há itens no banco - adicionar via interface
                 cy.log(' Nenhum item no backend — adicionando via interface');
                 adicionarPrimeiroProdutoViaUI();
                 cy.wait(3000);
                 
-                // Verificar novamente no banco após adicionar
                 cy.request('GET', `http://localhost:3000/api/cart?clientId=${clientId}`).then((resp) => {
                   cy.log(` Itens após adicionar: ${resp.body?.items?.length || 0}`);
                 });
                 
-                // Voltar para o carrinho e aguardar carregar
                 cy.visit('/app/cart');
                 cy.wait(5000);
               } else {
-                // Há itens no banco mas não estão aparecendo - recarregar página
                 cy.log(' Itens existem no banco mas não aparecem — recarregando página');
                 cy.visit('/app/cart');
                 cy.wait(5000);
                 
-                // Tentar novamente - se ainda não aparecer, adicionar novamente
                 cy.get('body').then(($body) => {
                   const aindaVazio = $body.find('.cart-item, table tbody tr').length === 0;
                   if (aindaVazio) {
@@ -277,7 +255,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
               }
             });
           } else {
-            // Sem clientId - adicionar produto e esperar carregar
             cy.log(' ClientId ausente — voltando aos produtos para adicionar item');
             adicionarPrimeiroProdutoViaUI();
             cy.wait(3000);
@@ -288,7 +265,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
       }
     });
   
-    // Aguardar e verificar que há itens no carrinho
     cy.get('.cart-item, table tbody tr', { timeout: 20000 }).should('exist');
     cy.log(' Carrinho confirmado com itens');
   };
@@ -305,20 +281,17 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
   };
 
   const selecionarAdicionarNovoCartaoNoCheckout = () => {
-    // Aguardar que o dropdown esteja visível e tenha opções carregadas
     cy.get('select#cardId, select[formcontrolname="cardId"]', { timeout: 10000 })
       .should('be.visible')
       .should('not.be.disabled')
       .should(($select) => {
         const el = $select[0] as HTMLSelectElement;
         const options = Array.from(el.options);
-        // Aguardar que o dropdown tenha pelo menos uma opção
         expect(options.length).to.be.greaterThan(0, 'Dropdown deve ter pelo menos uma opção');
       })
       .then($s => {
         const el = $s[0] as HTMLSelectElement;
         
-        // Listar todas as opções para debug
         const allOptions = Array.from(el.options).map(o => ({
           value: o.value,
           text: o.text.trim(),
@@ -327,14 +300,12 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
         
         cy.log(` Opções disponíveis no dropdown: ${JSON.stringify(allOptions)}`);
         
-        // Procurar pela opção "NEW_CARD" ou opção com texto "adicionar"
         const newCardOption = allOptions.find(o =>
           o.value === 'NEW_CARD' || /adicionar.*novo.*cart|novo.*cart|add.*card/i.test(o.text)
         );
         
         if (newCardOption) {
           cy.log(` Opção encontrada: ${newCardOption.text} (value: ${newCardOption.value})`);
-          // Tentar selecionar pelo value primeiro, depois pelo texto
           if (newCardOption.value === 'NEW_CARD') {
             cy.wrap($s).select('NEW_CARD');
           } else {
@@ -343,28 +314,23 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
         } else {
           cy.log(' Opção "Adicionar novo cartão" não encontrada no dropdown');
           cy.log(' Navegando diretamente para o perfil para adicionar cartão...');
-          // Se a opção não existe, navegar diretamente para o perfil
           cy.visit('/app/profile/edit');
         }
       });
     
-    // Verificar que chegou na página de perfil
     cy.url({ timeout: 8000 }).should('include', '/profile/edit');
   };
 
   const adicionarNovoCartaoNoPerfil = () => {
     cy.log(' Iniciando adição de novo cartão no perfil...');
     
-    // Aguardar que a página de perfil esteja carregada
     cy.url({ timeout: 10000 }).should('include', '/profile/edit');
-    cy.wait(3000); // Aguardar carregamento completo do Angular
+    cy.wait(3000);
     
-    // Verificar quantos cartões existem antes de adicionar
     cy.get('input[formcontrolname="numero"]', { timeout: 10000 }).then($inputs => {
       const cartoesAntes = $inputs.length;
       cy.log(` Cartões existentes antes: ${cartoesAntes}`);
       
-      // Verificar se o botão "Adicionar Cartão" existe e está visível
       cy.get('body').then($body => {
         const btnAdicionar = $body.find('button:contains("Adicionar"), button:contains("adicionar"), button:contains("+")');
         const temBotaoAdicionar = btnAdicionar.filter((i, el) => {
@@ -380,10 +346,8 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
             .click({ force: true });
         } else if (cartoesAntes === 0) {
           cy.log(' Nenhum cartão existe ainda - formulário deve estar disponível');
-          // Se não há cartões, o formulário pode já estar disponível
         } else {
           cy.log(' Botão "Adicionar Cartão" não encontrado, mas há cartões existentes');
-          // Tentar encontrar o botão de outra forma
           cy.get('button.btn-add, button[class*="add"], button[class*="btn"]').then($btns => {
             const addBtn = Array.from($btns).find(btn => {
               const text = btn.textContent?.toLowerCase() || '';
@@ -395,24 +359,19 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
           });
         }
         
-        cy.wait(2000); // Aguardar o formulário aparecer
-        
-        // Verificar que um novo formulário foi adicionado ou está disponível
+        cy.wait(2000); 
         cy.get('input[formcontrolname="numero"]', { timeout: 10000 }).then($inputs => {
           const cartoesApos = $inputs.length;
           cy.log(` Formulários de cartão: antes=${cartoesAntes}, agora=${cartoesApos}`);
           
           if (cartoesAntes > 0) {
-            // Se havia cartões antes, deve ter mais um agora
             expect(cartoesApos).to.be.greaterThan(cartoesAntes, 
               `Novo formulário de cartão deve aparecer (antes: ${cartoesAntes}, agora: ${cartoesApos})`);
           } else {
-            // Se não havia cartões, deve ter pelo menos um agora
             expect(cartoesApos).to.be.greaterThan(0, 'Deve haver pelo menos um formulário de cartão');
           }
         });
         
-        // Preencher o ÚLTIMO formulário (que é o novo cartão)
         cy.log(' Preenchendo dados do novo cartão...');
         cy.get('input[formcontrolname="numero"]').last().should('be.visible').clear().type(novoCartao.numero);
         cy.get('input[formcontrolname="nomeImpresso"]').last().should('be.visible').clear().type(novoCartao.nomeImpresso);
@@ -421,10 +380,8 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
         
         cy.log(` Preenchido novo cartão: ${novoCartao.bandeira} terminando em ${novoCartao.numero.slice(-4)}`);
         
-        // Aguardar um pouco para garantir que os campos foram preenchidos
         cy.wait(1000);
         
-        // Salvar/Atualizar perfil
         cy.get('button[type="submit"]', { timeout: 10000 })
           .should('be.visible')
           .should('not.be.disabled')
@@ -434,10 +391,8 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
             cy.wrap($btn).click();
           });
         
-        // Aguardar que o perfil seja salvo (pode redirecionar ou mostrar mensagem)
-        cy.wait(4000); // Aguardar mais tempo para garantir que salvou
+        cy.wait(4000); 
         
-        // Verificar se foi redirecionado ou se ainda está no perfil
         cy.url().then(url => {
           if (!/checkout/.test(url)) {
             cy.log(' Não foi redirecionado automaticamente, navegando para checkout...');
@@ -447,7 +402,7 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
           }
         });
         
-        cy.wait(2000); // Aguardar checkout carregar
+        cy.wait(2000);
       });
     });
   };
@@ -455,14 +410,12 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
   const selecionarCartaoRecemCriadoNoCheckout = () => {
     cy.log(' Procurando cartão recém-criado no checkout...');
     
-    // Aguardar que o checkout esteja carregado e o dropdown tenha opções
     cy.get('select#cardId, select[formcontrolname="cardId"]', { timeout: 15000 })
       .should('be.visible')
       .should('not.be.disabled')
       .should(($select) => {
         const el = $select[0] as HTMLSelectElement;
         const options = Array.from(el.options);
-        // Aguardar que tenha pelo menos uma opção válida (além do placeholder e NEW_CARD)
         const validOptions = options.filter(o => 
           o.value && 
           o.value !== '' && 
@@ -481,7 +434,6 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
         
         cy.log(` Opções disponíveis no dropdown: ${JSON.stringify(options)}`);
         
-        // Procurar pelo novo cartão MasterCard terminando em 4444
         const novoCartaoOption = options.find(o => {
           const hasMasterCard = /mastercard/i.test(o.text);
           const has4444 = /4444/.test(o.text);
@@ -492,9 +444,8 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
         if (novoCartaoOption) {
           cy.log(` Cartão encontrado: ${novoCartaoOption.text} (value: ${novoCartaoOption.value})`);
           cy.wrap($s).select(novoCartaoOption.value);
-          cy.wait(1000); // Aguardar seleção processar
+          cy.wait(1000); 
         } else {
-          // Se não encontrar pelo número específico, pegar o último cartão válido (provavelmente o mais recente)
           cy.log(' Cartão específico não encontrado, tentando selecionar último cartão válido...');
           const validOptions = options.filter(o => 
             o.value && 

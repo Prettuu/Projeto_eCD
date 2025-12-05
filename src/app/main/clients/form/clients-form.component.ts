@@ -265,7 +265,7 @@ export class ClientsFormComponent implements OnInit {
                 clientId: clientId,
                 cardNumber: String(cartao.numero).replace(/\s/g, ''),
                 cardHolder: String(cartao.nomeImpresso),
-                expiryDate: '12/30', // Default se não tiver
+                expiryDate: '12/30',
                 cvv: String(cartao.codigoSeguranca || ''),
                 isDefault: !!cartao.preferencial,
                 isActive: true

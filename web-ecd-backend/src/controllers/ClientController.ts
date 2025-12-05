@@ -52,14 +52,11 @@ export const ClientController = {
       }
       const updateData: any = { ...req.body };
       
-      // Se senha for enviada E não parecer um hash, fazer hash
       if (updateData.senha && updateData.senha.length < 100 && !updateData.senha.startsWith('$2')) {
         updateData.senha = await bcrypt.hash(updateData.senha, 10);
       } else if (!updateData.senha) {
-        // Se senha não for enviada, preservar a senha atual
         delete updateData.senha;
       }
-      // Se parecer um hash (comprimento > 100 ou começa com $2), significa que veio já hashada - NÃO fazer hash novamente
       
       await client.update(updateData);
       res.json(client);

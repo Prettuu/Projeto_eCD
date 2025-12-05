@@ -14,7 +14,7 @@ export class RoleGuard implements CanActivate {
     const requiredRole = route.data?.['role'];
     
     if (!requiredRole) {
-      return true; // Não requer role específico
+      return true;
     }
 
     const userRole = this.auth.getRole();

@@ -34,7 +34,7 @@ export class NotificationFormComponent implements OnInit {
       titulo: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
       mensagem: ['', [Validators.required, Validators.minLength(10)]],
       tipo: ['INFO', Validators.required],
-      enviarPara: ['todos', Validators.required], // 'todos' ou 'especifico'
+      enviarPara: ['todos', Validators.required],
       clientId: [null]
     });
 

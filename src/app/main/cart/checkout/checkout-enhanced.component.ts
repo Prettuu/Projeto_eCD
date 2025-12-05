@@ -177,13 +177,13 @@ throw new Error('Method not implemented.');
 
   private validateCurrentStep(): boolean {
     switch (this.currentStep) {
-      case 1: // Cliente
+      case 1:
         return this.validateClientSelection();
-      case 2: // Endereço
+      case 2:
         return this.validateAddressSelection();
-      case 3: // Pagamento
+      case 3:
         return this.validatePaymentSelection();
-      case 4: // Confirmação
+      case 4:
         return true;
       default:
         return false;
@@ -442,7 +442,7 @@ throw new Error('Method not implemented.');
 
   getStepTitle(step: number): string {
     const titles = [
-      '', // Índice 0 não usado
+      '', 
       'Selecionar Cliente',
       'Endereço de Entrega',
       'Forma de Pagamento',
@@ -453,7 +453,7 @@ throw new Error('Method not implemented.');
 
   getStepIcon(step: number): any {
     const icons = [
-      null, // Índice 0 não usado
+      null,
       this.faShoppingCart,
       this.faMapMarkerAlt,
       this.faCreditCard,

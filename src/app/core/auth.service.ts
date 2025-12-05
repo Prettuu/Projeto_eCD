@@ -60,22 +60,22 @@ export class AuthService {
   }
 
   private setUserData(user: UserData): void {
-    console.log('Setting user data with:', JSON.stringify(user, null, 2)); // DEBUG
+    console.log('Setting user data with:', JSON.stringify(user, null, 2));
     localStorage.setItem(this.tokenKey, user.token);
     localStorage.setItem(this.roleKey, user.role);
     if (user.nome) {
       localStorage.setItem(this.nomeKey, user.nome);
     }
     if (user.userId !== undefined && user.userId !== null) {
-      console.log('Storing userId:', user.userId, 'type:', typeof user.userId); // DEBUG
+      console.log('Storing userId:', user.userId, 'type:', typeof user.userId);
       localStorage.setItem(this.userIdKey, user.userId.toString());
       const stored = localStorage.getItem(this.userIdKey);
-      console.log('Verified userId in localStorage:', stored); // DEBUG
+      console.log('Verified userId in localStorage:', stored);
     } else {
       console.warn('No userId found in user data:', user);
     }
     if (user.clientId !== undefined && user.clientId !== null) {
-      console.log('Storing clientId:', user.clientId, 'type:', typeof user.clientId); // DEBUG
+      console.log('Storing clientId:', user.clientId, 'type:', typeof user.clientId);
       localStorage.setItem(this.clientIdKey, user.clientId.toString());
       console.log('clientId saved to localStorage:', user.clientId);
     } else {

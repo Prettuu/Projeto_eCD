@@ -69,7 +69,6 @@ export const OrderController = {
       const { clientId, items, desconto, cupom, paymentStatus } = req.body;
       let total = req.body.total || 0;
 
-      // validate payment payload if provided
       const payment = req.body.payment;
       let computedPaymentStatus = paymentStatus || 'PENDENTE';
 
@@ -106,7 +105,6 @@ export const OrderController = {
             return res.status(400).json({ message: 'Tipo de pagamento desconhecido' });
           }
 
-          // if validation passed, mark as approved (simulated)
           computedPaymentStatus = 'APROVADO';
           } catch (e) {
           return res.status(400).json({ message: 'Erro ao processar pagamento', error: (e as any)?.message || e });

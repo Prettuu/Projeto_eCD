@@ -8,7 +8,7 @@ export class Exchange extends Model {
   public id!: number;
   public orderId!: number;
   public clientId!: number;
-  public status!: string; // PENDENTE, APROVADA, NEGADA, PROCESSANDO, CONCLUIDA, CANCELADA
+  public status!: string;
   public motivo!: string;
   public observacoes?: string;
   public couponGenerated?: string | null;

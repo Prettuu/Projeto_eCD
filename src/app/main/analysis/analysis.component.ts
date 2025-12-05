@@ -122,7 +122,6 @@ export class AnalysisComponent implements OnInit {
     const { startDate, endDate } = this.dateForm.value;
     this.loading = true;
 
-    // Carregar dados agrupados por data para o gráfico
     this.analysisService.getProductsByDate(startDate, endDate).subscribe({
       next: (data) => {
         this.productsByDateData = data.products;
@@ -139,7 +138,6 @@ export class AnalysisComponent implements OnInit {
       }
     });
 
-    // Também carregar dados agregados para a tabela
     this.analysisService.compareProductsByDateRange(startDate, endDate).subscribe({
       next: (data) => {
         this.productsData = data.products;
@@ -158,7 +156,6 @@ export class AnalysisComponent implements OnInit {
     const { startDate, endDate } = this.dateForm.value;
     this.loading = true;
 
-    // Carregar dados agrupados por data para o gráfico
     this.analysisService.getCategoriesByDate(startDate, endDate).subscribe({
       next: (data) => {
         this.categoriesByDateData = data.categories;
@@ -175,7 +172,6 @@ export class AnalysisComponent implements OnInit {
       }
     });
 
-    // Também carregar dados agregados para a tabela
     this.analysisService.compareCategoriesByDateRange(startDate, endDate).subscribe({
       next: (data) => {
         this.categoriesData = data.categories;
@@ -193,14 +189,12 @@ export class AnalysisComponent implements OnInit {
       if (this.productsByDateData.length === 0) {
         this.loadProducts();
       } else {
-        // Atualizar gráfico com dados já carregados
         this.updateChartFromProducts();
       }
     } else if (tab === 'categories') {
       if (this.categoriesByDateData.length === 0) {
         this.loadCategories();
       } else {
-        // Atualizar gráfico com dados já carregados
         this.updateChartFromCategories();
       }
     }
@@ -236,7 +230,6 @@ export class AnalysisComponent implements OnInit {
       return;
     }
 
-    // Pegar os top 5 produtos por total de vendas
     const topProducts = this.productsByDateData
       .map(product => ({
         ...product,
@@ -253,9 +246,7 @@ export class AnalysisComponent implements OnInit {
       { border: '#fa709a', background: 'rgba(250, 112, 154, 0.1)' }
     ];
 
-    // Criar datasets para cada produto (cada produto é uma linha)
     const datasets = topProducts.map((product, index) => {
-      // Criar array de quantidades para cada data
       const data = this.productsDates.map(date => {
         const sale = product.salesByDate.find(s => s.date === date);
         return sale ? sale.quantity : 0;
@@ -273,7 +264,6 @@ export class AnalysisComponent implements OnInit {
       };
     });
 
-    // Formatar datas para exibição no eixo X
     const labels = this.productsDates.map(date => this.formatDateDisplay(date));
 
     this.chartData = {
@@ -288,7 +278,6 @@ export class AnalysisComponent implements OnInit {
       return;
     }
 
-    // Pegar todas as categorias (ou top 5 se houver muitas)
     const topCategories = this.categoriesByDateData
       .map(category => ({
         ...category,
@@ -305,9 +294,7 @@ export class AnalysisComponent implements OnInit {
       { border: '#fa709a', background: 'rgba(250, 112, 154, 0.1)' }
     ];
 
-    // Criar datasets para cada categoria (cada categoria é uma linha)
     const datasets = topCategories.map((category, index) => {
-      // Criar array de valores para cada data
       const data = this.categoriesDates.map(date => {
         const sale = category.salesByDate.find(s => s.date === date);
         return sale ? sale.value : 0;
@@ -325,7 +312,6 @@ export class AnalysisComponent implements OnInit {
       };
     });
 
-    // Formatar datas para exibição no eixo X
     const labels = this.categoriesDates.map(date => this.formatDateDisplay(date));
 
     this.chartData = {

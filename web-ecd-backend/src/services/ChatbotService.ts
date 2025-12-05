@@ -6,15 +6,12 @@ import { Op } from 'sequelize';
 
 export class ChatbotService {
 
-  // =============================
-  // MÉTODO PRINCIPAL
-  // =============================
+
   static async generateResponse(
     message: string,
     clientId?: number
   ): Promise<string> {
 
-    // ✅ Constrói contexto do projeto (quando existir)
     const context = await this.buildContext(clientId);
 
     const systemPrompt = `

@@ -7,10 +7,10 @@ export interface Client {
   id?: number;
   nome: string;
   email: string;
-  cpf?: string; // Opcional pois pode não estar preenchido
+  cpf?: string;
   ativo?: boolean;
-  role?: 'ADMIN' | 'CLIENT'; // Adicionar role para compatibilidade com User
-  cartoes?: Cartao[] | any; // Pode vir como JSON string do backend
+  role?: 'ADMIN' | 'CLIENT';
+  cartoes?: Cartao[] | any;
   telefone?: any;
   enderecoResidencial?: {
     cep?: string;

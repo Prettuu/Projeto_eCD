@@ -32,7 +32,7 @@ form,
     &:focus {
       outline: none;
       border-color: var(--color-primary);
-      background: rgba(11, 16, 32, 0.8); // Fundo ligeiramente mais claro no focus
+      background: rgba(11, 16, 32, 0.8);
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
     
@@ -80,7 +80,7 @@ form,
       &:focus {
         outline: none;
         border-color: var(--color-primary);
-        background: rgba(11, 16, 32, 0.8); // Fundo ligeiramente mais claro no focus
+        background: rgba(11, 16, 32, 0.8);
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
       }
       

@@ -19,8 +19,8 @@ export class StockComponent implements OnInit {
   iconAdd = faPlus;
   iconEdit = faPenToSquare;
   iconTrash = faTrash;
-  isReadonly = false; // For clients viewing products
-  isAdmin = false; // Track if user is admin
+  isReadonly = false;
+  isAdmin = false;
 
   constructor(
     private stockService: StockService,
@@ -143,7 +143,6 @@ export class StockComponent implements OnInit {
 
     this.feedbackService.create({ clientId, productId, liked }).subscribe({
       next: () => {
-        // Feedback salvo com sucesso (silencioso)
       },
       error: (err) => {
         console.error('Erro ao salvar feedback:', err);
