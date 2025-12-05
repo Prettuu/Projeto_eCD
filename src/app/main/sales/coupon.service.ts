@@ -82,7 +82,7 @@ export class CouponService {
         type: 'FIXED',
         value: 30,
         minValue: 0,
-        validUntil: new Date('2024-12-31'),
+        validUntil: new Date('2099-12-31'),
         usedCount: 0,
         maxUses: 1000,
         isActive: true

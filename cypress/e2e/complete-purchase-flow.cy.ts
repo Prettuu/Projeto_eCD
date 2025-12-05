@@ -1,7 +1,3 @@
-// cypress/e2e/complete-purchase-flow.cy.ts
-// Fluxo completo: Login -> Primeiro acesso -> Cadastro -> Login -> Produto -> Carrinho -> Checkout
-// -> Selecionar "Adicionar novo cartão" -> Perfil -> Adicionar cartão -> Voltar e selecionar cartão -> Finalizar
-
 describe('Fluxo Completo de Compra - Novo Cliente', () => {
   const timestamp = Date.now();
 
@@ -507,4 +503,4 @@ describe('Fluxo Completo de Compra - Novo Cliente', () => {
             o.value !== '' &&
             !/selecione/i.test(o.text)
           );
-        }})
+        }});

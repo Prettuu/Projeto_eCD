@@ -51,7 +51,6 @@ export class CheckoutComponent implements OnInit {
       numero: ['', Validators.required],
       complemento: [''],
       cupom: [''],
-      // payment controls
       paymentType: ['ONE', Validators.required], // 'ONE' or 'TWO'
       cardId: [null],
       cardId2: [null],

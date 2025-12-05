@@ -27,7 +27,6 @@ describe('CRUD de Clientes', () => {
   };
 
   beforeEach(() => {
-    // Login como admin antes de acessar clientes
     cy.visit('/login');
     cy.get('input[id="email"], input[type="email"]').type('admin@teste.com');
     cy.get('input[id="senha"], input[type="password"]').type('admin123');
@@ -47,7 +46,6 @@ describe('CRUD de Clientes', () => {
     cy.contains('Novo cliente').should('be.visible').click();
     cy.wait(500);
 
-    // === Etapa 1: Dados do Cliente ===
     cy.get('select[id="genero"], select[formcontrolname="genero"]').select('M');
     cy.get('input[id="nome"], input[formcontrolname="nome"]').type(cliente.nome);
     cy.get('input[id="email"], input[formcontrolname="email"]').type(cliente.email);
@@ -55,16 +53,10 @@ describe('CRUD de Clientes', () => {
     cy.get('input[id="nascimento"], input[formcontrolname="dataNascimento"]').type(cliente.nascimento);
     cy.get('input[id="senha"], input[formcontrolname="senha"]').type(cliente.senha);
 
-    // Telefone - usando formGroupName
     cy.get('select[formcontrolname="tipo"]').first().select('celular', { force: true });
     cy.get('input[formcontrolname="ddd"]').first().type(cliente.ddd);
     cy.get('input[formcontrolname="numero"]').first().type(cliente.numero);
     
-    // Marcar como ativo
-    cy.get('input[id="ativo"], input[formcontrolname="ativo"]').check({ force: true });
-
-    // === Etapa 2: Endereços ===
-    // Endereço Residencial
     cy.get('input[formcontrolname="logradouro"]').first().type(endereco.logradouro);
     cy.get('input[formcontrolname="numero"]').eq(1).type(endereco.numero);
     cy.get('input[formcontrolname="bairro"]').first().type(endereco.bairro);
@@ -73,11 +65,9 @@ describe('CRUD de Clientes', () => {
     cy.get('input[formcontrolname="estado"]').first().type(endereco.estado);
     cy.get('input[formcontrolname="pais"]').first().type(endereco.pais);
 
-    // Adicionar Endereço de Entrega
     cy.contains('button', 'Adicionar Endereço').click();
     cy.wait(300);
     
-    // Preencher endereço de entrega (primeiro endereço do array)
     cy.get('input[formcontrolname="logradouro"]').eq(1).type('Rua Secundária');
     cy.get('input[formcontrolname="numero"]').eq(2).type('456');
     cy.get('input[formcontrolname="bairro"]').eq(1).type('Bairro Novo');
@@ -86,7 +76,6 @@ describe('CRUD de Clientes', () => {
     cy.get('input[formcontrolname="estado"]').eq(1).type('SP');
     cy.get('input[formcontrolname="pais"]').eq(1).type('Brasil');
 
-    // === Etapa 3: Cartões ===
     cy.contains('button', 'Adicionar Cartão').click();
     cy.wait(300);
     
@@ -96,7 +85,6 @@ describe('CRUD de Clientes', () => {
     cy.get('input[formcontrolname="codigoSeguranca"]').last().type(cartao.codigoSeguranca);
     cy.get('input[type="checkbox"][formcontrolname="preferencial"]').last().check({ force: true });
     
-    // Salvar
     cy.get('button[type="submit"]').should('be.enabled').click();
     cy.wait(2000);
     cy.url().should('include', '/clients');
@@ -119,12 +107,10 @@ describe('CRUD de Clientes', () => {
     
     cy.get('input[id="nome"], input[formcontrolname="nome"]').clear().type('João Editado');
     
-    // Salvar
     cy.get('button[type="submit"]').should('be.enabled').click();
     cy.wait(2000);
     cy.url().should('include', '/clients');
 
-    // ✅ Aguarda atualização
     cy.get('table', { timeout: 5000 }).should('contain', 'João Editado');
   });
 
@@ -132,7 +118,6 @@ describe('CRUD de Clientes', () => {
     cy.contains('button', 'Excluir').first().click();
     cy.on('window:confirm', () => true);
 
-    // ✅ Espera lista atualizar
     cy.wait(2000);
     cy.get('table', { timeout: 5000 }).should('not.contain', 'João Editado');
   });

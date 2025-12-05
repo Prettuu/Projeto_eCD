@@ -5,15 +5,41 @@ import { ExchangeCoupon } from '../models/ExchangeCoupon';
 import { Op } from 'sequelize';
 
 export class ChatbotService {
+
+  // =============================
+  // MÉTODO PRINCIPAL
+  // =============================
   static async generateResponse(
     message: string,
     clientId?: number
   ): Promise<string> {
+
+    // ✅ Constrói contexto do projeto (quando existir)
     const context = await this.buildContext(clientId);
-    
-    const systemPrompt = `Você é um assistente inteligente, amigável e prestativo. Responda às perguntas do usuário da melhor forma possível, buscando ser sempre claro, completo e natural, como um atendente humano experiente.`;
+
+    const systemPrompt = `
+Você é um assistente virtual híbrido.
+
+COMPORTAMENTO:
+- Você pode responder perguntas gerais sobre qualquer assunto, como um assistente comum.
+- Quando a pergunta estiver relacionada à loja eCD, utilize e priorize as informações reais do contexto fornecido.
+- Nunca diga que não pode responder algo.
+- Nunca force o assunto da loja se a pergunta não for sobre ela.
+- Seja educado, natural e converse como um atendente humano experiente.
+- Responda sempre em português do Brasil.
+
+SOBRE O PROJETO:
+- A eCD é um e-commerce de CDs e produtos musicais.
+- Possui produtos, carrinho, pedidos, cupons, trocas e recomendações.
+- O backend é em Node.js com TypeScript e Sequelize.
+- O frontend é em Angular.
+
+CONTEXTO DO SISTEMA (use apenas se for relevante para a pergunta):
+${context}
+    `;
 
     try {
+      
       if (!process.env.OPENAI_API_KEY) {
         return this.getFallbackResponse(message);
       }
@@ -21,23 +47,17 @@ export class ChatbotService {
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4o-mini',
           messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: message
-            }
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
           ],
-          max_tokens: 1200,
-          temperature: 0.85
+          temperature: 0.7,
+          max_tokens: 900
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
             'Content-Type': 'application/json'
           }
         }
@@ -51,6 +71,7 @@ export class ChatbotService {
   }
 
   private static async buildContext(clientId?: number): Promise<string> {
+
     const defaultCoupons = [
       { code: 'PROMO10', value: '10%', min: 'R$ 50' },
       { code: 'DESC20', value: '20%', min: 'R$ 100' },
@@ -60,21 +81,29 @@ export class ChatbotService {
     ];
 
     let context = `CUPONS DISPONÍVEIS:\n`;
-    context += defaultCoupons.map(c => `- ${c.code}: ${c.value} de desconto (mínimo ${c.min})`).join('\n');
-    context += `\n\nINSTRUÇÕES PARA FAZER PEDIDO:\n`;
-    context += `1. Adicione produtos ao carrinho na página de Produtos\n`;
-    context += `2. Vá para o Carrinho e revise seus itens\n`;
-    context += `3. Clique em "Finalizar Compra"\n`;
-    context += `4. Aplique um cupom (se tiver) no campo de cupom\n`;
-    context += `5. Selecione forma de pagamento e confirme\n\n`;
+    context += defaultCoupons
+      .map(c => `- ${c.code}: ${c.value} de desconto (mínimo ${c.min})`)
+      .join('\n');
+
+    context += `\n\nINSTRUÇÕES PARA COMPRAR:\n`;
+    context += `1. Escolha produtos na página Produtos\n`;
+    context += `2. Adicione ao carrinho\n`;
+    context += `3. Finalize a compra\n`;
+    context += `4. Aplique cupom se desejar\n`;
+    context += `5. Confirme o pagamento\n\n`;
+
+    const products = await Product.findAll({
+      where: { ativo: true },
+      limit: 5,
+      attributes: ['titulo', 'artista', 'categoria', 'valorVenda']
+    });
+
+    context += `PRODUTOS DISPONÍVEIS:\n`;
+    context += products
+      .map(p => `• ${p.titulo} - ${p.artista} (${p.categoria}) - R$ ${p.valorVenda}`)
+      .join('\n');
 
     if (!clientId) {
-      const products = await Product.findAll({
-        where: { ativo: true },
-        limit: 5,
-        attributes: ['titulo', 'artista', 'categoria']
-      });
-      context += `PRODUTOS DISPONÍVEIS: ${products.map(p => `${p.titulo} - ${p.artista}`).join(', ')}`;
       return context;
     }
 
@@ -87,120 +116,36 @@ export class ChatbotService {
       order: [['createdAt', 'DESC']]
     });
 
-    const activeCoupons = await ExchangeCoupon.findAll({
-      where: {
-        clientId,
-        used: false
-      },
+    const exchangeCoupons = await ExchangeCoupon.findAll({
+      where: { clientId, used: false },
       limit: 5
     });
 
-    const products = await Product.findAll({
-      where: { ativo: true },
-      limit: 10,
-      attributes: ['titulo', 'artista', 'categoria', 'valorVenda']
-    });
+    context += `\n\nDADOS DO CLIENTE:\n`;
+    context += `- Total de pedidos: ${orders.length}\n`;
 
-    context += `HISTÓRICO DO CLIENTE:\n`;
-    context += `- Pedidos anteriores: ${orders.length}\n`;
     if (orders.length > 0) {
-      const lastOrder = orders[0];
-      context += `- Último pedido: #${lastOrder.id} - Status: ${lastOrder.status}\n`;
+      context += `- Último pedido: #${orders[0].id} - Status: ${orders[0].status}\n`;
     }
-    
-    if (activeCoupons.length > 0) {
-      context += `- Cupons de troca disponíveis: ${activeCoupons.map(c => c.code).join(', ')}\n`;
+
+    if (exchangeCoupons.length > 0) {
+      context += `- Cupons de troca disponíveis: ${exchangeCoupons.map(c => c.code).join(', ')}\n`;
     }
-    
-    context += `\nPRODUTOS DISPONÍVEIS: ${products.map(p => `${p.titulo} (${p.categoria}) - R$ ${p.valorVenda}`).join(', ')}`;
 
     return context;
   }
 
   private static getFallbackResponse(message: string): string {
-    const lowerMessage = message.toLowerCase();
+    return `Olá 🙂  
+Posso conversar sobre qualquer assunto e também ajudar com a loja eCD.
 
-    if (lowerMessage.includes('como fazer') && (lowerMessage.includes('pedido') || lowerMessage.includes('compra'))) {
-      return `Para fazer um pedido, siga estes passos:
-1. Vá até a página "Produtos" e adicione os CDs desejados ao carrinho
-2. Acesse o "Carrinho" no menu ou clique no ícone do carrinho
-3. Revise os itens e clique em "Finalizar Compra"
-4. Na página de checkout, você pode aplicar um cupom de desconto (se tiver)
-5. Selecione a forma de pagamento e confirme o pedido
-6. Aguarde a aprovação do administrador
+Se quiser, posso:
+• Recomendar CDs
+• Informar preços e categorias
+• Explicar como comprar
+• Ajudar com pedidos, cupons e trocas
 
-Dica: Você pode usar cupons como PROMO10, DESC20 ou COMPRA1 para ter desconto!`;
-    }
-
-    if (lowerMessage.includes('cupom') || lowerMessage.includes('desconto') || lowerMessage.includes('promoção')) {
-      return `Temos vários cupons disponíveis:
-• PROMO10 - 10% de desconto (mínimo R$ 50)
-• DESC20 - 20% de desconto (mínimo R$ 100)
-• FIXED15 - R$ 15 de desconto (mínimo R$ 30)
-• COMPRA1 - 30% de desconto (sem valor mínimo)
-• 30FF - R$ 30 de desconto (sem valor mínimo)
-
-Para usar: No checkout, digite o código do cupom no campo "Cupom de desconto" e clique em "Aplicar".`;
-    }
-
-    if (lowerMessage.includes('recomend') || lowerMessage.includes('sugest')) {
-      return 'Baseado no seu histórico de compras, recomendo explorar CDs da mesma categoria dos seus pedidos anteriores. Você pode ver recomendações personalizadas na página inicial. Posso ajudar a encontrar algo específico!';
-    }
-
-    if (lowerMessage.includes('preço') || lowerMessage.includes('valor') || lowerMessage.includes('custo')) {
-      return 'Os preços variam conforme o produto. Você pode ver todos os valores na página "Produtos". Quer que eu recomende algo dentro de um orçamento específico?';
-    }
-
-    if (lowerMessage.includes('status') && lowerMessage.includes('pedido')) {
-      return 'Para ver o status do seu pedido, acesse a seção "Pedidos" no menu. Lá você verá todos os seus pedidos e seus respectivos status (PENDENTE, APROVADO, ENVIADO, ENTREGUE, etc.). Se tiver dúvida sobre um pedido específico, me informe o número!';
-    }
-
-    if (lowerMessage.includes('pedido') || lowerMessage.includes('compra')) {
-      return 'Você pode acompanhar seus pedidos na seção "Pedidos" do menu. Lá você verá o histórico completo com status, valores e detalhes. Se precisar de ajuda com um pedido específico, me informe o número!';
-    }
-
-    if (lowerMessage.includes('categoria') || lowerMessage.includes('gênero') || lowerMessage.includes('estilo')) {
-      return 'Temos várias categorias disponíveis: Rock, Pop, Sertanejo, Funk, Rap, Trap, MPB, Forró, Pagode, Samba, Eletrônica e muitas outras! Você pode filtrar por categoria na página de Produtos. Qual estilo você prefere?';
-    }
-
-    if (lowerMessage.includes('carrinho')) {
-      return 'Para acessar seu carrinho, clique no ícone do carrinho no menu superior ou vá até "Carrinho" no menu. Lá você pode revisar os itens, alterar quantidades, aplicar cupons e finalizar a compra.';
-    }
-
-    if (lowerMessage.includes('pagamento') || lowerMessage.includes('pagar')) {
-      return 'O pagamento é feito no checkout após adicionar produtos ao carrinho. Você pode escolher entre diferentes formas de pagamento disponíveis. O pedido será processado após a confirmação e aguardará aprovação do administrador.';
-    }
-
-    if (lowerMessage.includes('troca') || lowerMessage.includes('devolução')) {
-      return 'Para solicitar troca ou devolução, acesse a seção "Pedidos", encontre o pedido desejado e clique em "Solicitar Troca". Você precisará informar os itens que deseja trocar e o motivo.';
-    }
-
-    const complexTopics = ['filosofia', 'política', 'ciência', 'história', 'matemática', 'física', 'química', 'biologia', 'medicina', 'direito', 'economia avançada'];
-    const isComplex = complexTopics.some(topic => lowerMessage.includes(topic));
-    
-    if (isComplex) {
-      return 'Desculpe, não possuo conhecimento sobre esse assunto. Sou especializado em ajudar com produtos, pedidos, cupons e informações sobre nossa loja de CDs. Como posso ajudar você com algo relacionado à loja?';
-    }
-
-    return 'Olá! Posso ajudar você com:\n• Como fazer pedidos (passo a passo)\n• Cupons disponíveis e como usar\n• Status de pedidos\n• Recomendações de produtos\n• Categorias e preços\n\nO que você gostaria de saber?';
+O que você gostaria de saber?`;
   }
 
-  static async searchProducts(query: string): Promise<any[]> {
-    const products = await Product.findAll({
-      where: {
-        ativo: true,
-        estoque: { [Op.gt]: 0 },
-        [Op.or]: [
-          { titulo: { [Op.like]: `%${query}%` } },
-          { artista: { [Op.like]: `%${query}%` } },
-          { categoria: { [Op.like]: `%${query}%` } }
-        ]
-      },
-      limit: 5,
-      attributes: ['id', 'titulo', 'artista', 'categoria', 'valorVenda']
-    });
-
-    return products;
-  }
 }
-
